@@ -22,13 +22,13 @@ const UserView = props => {
   )
 }
 
-const DisplayType = props => {
-  return (
-    <div style={{position: "absolute", top: 0, left: 0}}>
-      room type: {props.type}
-    </div>
-  )
-}
+// const DisplayType = props => {
+//   return (
+//     <div style={{position: "absolute", top: 0, left: 0}}>
+//       room type: {props.type}
+//     </div>
+//   )
+// }
 
 const LocalView = props => {
   return (
