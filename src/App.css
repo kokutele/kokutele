@@ -1,39 +1,43 @@
+@import '~antd/dist/antd.css';
+
+
 .App {
-  text-align: center;
+  text-align: left;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.App .container  {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 0 auto;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-float infinite 3s ease-in-out;
-  }
+.App header {
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #330033;
 }
 
-.App-header {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.App header .title a {
+  font-size: 15pt; 
+  color: #fff;
+  vertical-align: bottom;
+  font-weight: bold;
+}
+.App h2 { padding: 0; margin: 0; }
+
+
+.App .tower {
+  height: calc( 100vh - 32px);
+  background-image: url('/tower_of_tokyo328_o50_b300.jpg');
+  background-attachment: fixed;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
 }
 
-.App-link {
-  color: rgb(112, 76, 182);
-}
-
-@keyframes App-logo-float {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(10px)
-  }
-  100% {
-    transform: translateY(0px)
-  }
-}
