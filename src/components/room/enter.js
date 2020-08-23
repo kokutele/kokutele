@@ -24,7 +24,7 @@ export default function(props) {
   return (
     <div className="Enter" style={{ textAlign: "left" }}>
       <Space direction="vertical">
-        <RTCVideo stream={stream} width="512px" />
+        <RTCVideo stream={stream} muted={true} width="512px" />
         <Form
           {...layout}
           name="enter-room"

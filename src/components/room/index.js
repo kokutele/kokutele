@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import { Alert, Space } from 'antd'
+import { Alert, Space, Steps } from 'antd'
 
 import Logo from '../common/logo'
 import ConnectVideo from './connect-video'
@@ -17,6 +17,18 @@ const descs = {
   "IDLE": "まず、ビデオカメラに接続しよう",
   "CONNECTED": "名前を入力してビデオルームに入ろう",
   "ENTERED": "@@@"
+}
+
+const EnterStep = props => {
+  const { step } = props
+  return (
+    <div style={{textAlign: "center"}}>
+      <Steps current={step}>
+        <Steps.Step />
+        <Steps.Step />
+      </Steps>
+    </div>
+  )
 }
 
 export default function Room( props ) {
@@ -45,14 +57,16 @@ export default function Room( props ) {
             <div style={styleRoom}>
               <Space direction="vertical">
                 { state === "IDLE" && (
-                  <div>
+                  <Space direction="vertical">
                     <Logo desc={descs[state]} />
+                    <EnterStep step={0} />
                     <ConnectVideo onClick={ e=> {changeState("CONNECTED")}}/>
-                  </div>
+                  </Space>
                 )}
                 { state === "CONNECTED" && (
-                  <div>
+                  <Space direction="vertical">
                     <Logo desc={descs[state]} />
+                    <EnterStep step={1} />
                     { !!mesg && (
                       <Alert mesg={mesg} />
                     )}
@@ -61,7 +75,7 @@ export default function Room( props ) {
                       setUserName(e.username)
                       changeState('ENTERED')
                     }} onError={setMessage} />
-                  </div>
+                  </Space>
                 )}
                 { state === "ENTERED" && (
                   <VideoRoom localStream={_localStream} userName={_userName} roomId={props.roomId} type={props.type} />
