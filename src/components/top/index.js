@@ -27,7 +27,7 @@ export default function() {
           <div className="container">
             <div className="top" style={styleTop}>
               <Space direction="vertical">
-                <Logo desc="国産で、誰でも使える安心テレカン" />
+                <Logo desc="国産で、誰でも無料で使える安心テレカン" />
                 <Button icon={<ArrowRightOutlined />} onClick={handleCreate} type="primary" shape="round" size="large">
                   create room
                 </Button>
