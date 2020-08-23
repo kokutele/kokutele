@@ -1,5 +1,6 @@
 import React from 'react'
 import { Form, Input, Button, Space } from 'antd'
+import { ImportOutlined } from '@ant-design/icons'
 import RTCVideo from '../common/rtc-video'
 
 const layout = {
@@ -46,7 +47,7 @@ export default function(props) {
             <Input placeholder="名前を入力して下さい" />
           </Form.Item>
           <Form.Item {...tailLayout}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" shape="round" icon={<ImportOutlined />} size="large" htmlType="submit">
               Enter
             </Button>
           </Form.Item>
