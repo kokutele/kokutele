@@ -69,10 +69,12 @@ export default function Room( props ) {
               { state === "CONNECTED" && (
                 <div>
                   <Logo desc={descs[state]} />
-                  <EnterStep step={1} />
                   { !!mesg && (
-                    <Alert mesg={mesg} />
+                    <div style={{textAlign: "left"}}>
+                      <Alert type="error" showIcon message={mesg} />
+                    </div>
                   )}
+                  <EnterStep step={1} />
                   <Enter stream={_localStream} onFinish={e => {
                     console.log(e)
                     setUserName(e.username)
