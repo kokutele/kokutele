@@ -17,7 +17,7 @@ const styleRoom = {
 
 const descs = {
   "IDLE": "まず、ビデオカメラに接続しよう",
-  "CONNECTED": "名前を入力してビデオルームに入ろう",
+  "CONNECTED": "名前を入力してテレカンルームに入ろう",
   "ENTERED": "@@@"
 }
 
