@@ -1,11 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Avatar, Alert, Button, Col, Row, notification } from 'antd'
+import { Avatar, Alert, Button, Col, Row } from 'antd'
 import { AudioOutlined, AudioMutedOutlined, CopyOutlined, UsergroupAddOutlined } from '@ant-design/icons'
 
 import SkywayHandler from '../../libs/skyway-handler'
 import RTCVideo from '../common/rtc-video'
-
-const Context = React.createContext({ name: 'Default' });
 
 const UserView = props => {
   const { stream, width, userName, showAudioWave, muted } = props
@@ -55,7 +53,6 @@ const RemoteView = props => {
   const [ _errMessage, setErrMessage ] = useState('')
   const [ _voiceOnly, setVoiceOnly ] = useState(false)
   const [ _copied, setCopied ] = useState(false)
-  const [api, contextHolder] = notification.useNotification()
 
   //const _api = useRef( notification.useNotification() )
 
@@ -83,13 +80,6 @@ const RemoteView = props => {
     const videoTracks = localStream.getVideoTracks()
 
     if( num > 3 ) {
-      if( videoTracks[0].enabled ) {
-        api.info({
-          message: 'お知らせ',
-          description: '参加者3人以上になると、自動で音声のみになります',
-          placement: 'bottomLeft'
-        })
-      }
       setVoiceOnly(true)
       onExceeds(true)
       videoTracks.forEach( track => track.enabled = false)
@@ -99,7 +89,7 @@ const RemoteView = props => {
       videoTracks.forEach( track => track.enabled = true)
     }
 
-  }, [api, _remotes, localStream, onExceeds])
+  }, [_remotes, localStream, onExceeds])
 
   useEffect( _ => {
     const db = new Map()
@@ -164,50 +154,54 @@ const RemoteView = props => {
 
 
   return (
-    <Context.Provider value={{ name: 'Ant Design' }}>
-      {contextHolder}
-      <div style={{ position: "absolute", textAlign: "left", left: 0, top: 0, width: "100%", height: "100%", backgroundColor: "#000"}}>
-        { !!_errMessage && (
-          <div>
-            <Alert description={_errMessage} message="エラーが発生しました" type="error"  showIcon />
-          </div>
-        )}
-        { _remotes.length === 0 && (
-          <div>
-            <Alert 
-              description={<div>このURLを共有しよう： {window.location.href} <Button type="link" onClick={ _ => {
-                const listener = function(e){
-                  e.clipboardData.setData("text/plain" , window.location.href);    
-                  setCopied(true)
-                  e.preventDefault();
-                  document.removeEventListener("copy", listener);
-                  setTimeout( _ => setCopied(false), 3000)
-                }
-                document.addEventListener("copy" , listener);
-                document.execCommand("copy")
-              }}><CopyOutlined /></Button>{ _copied && ' コピーしました' }</div>} 
-              message={<div>今この部屋にいるのは、あなただけです</div>}
-              showIcon 
-            />
-          </div>
-        )}
+    <div style={{ position: "absolute", textAlign: "left", left: 0, top: 0, width: "100%", height: "100%", backgroundColor: "#000"}}>
+      { !!_errMessage && (
         <div>
-          <Row span={24}>
-          { _remotes.filter(o => !!o.stream ).map( (obj, idx) => (
-            <Col key={idx} span={24 / Math.ceil(Math.sqrt(_remotes.length))}>
-              <UserView showAudioWave={_voiceOnly} width="100%" userName={obj.userName} stream={obj.stream} />
-            </Col>
-          ))}
-          </Row>
+          <Alert description={_errMessage} message="エラーが発生しました" type="error"  showIcon />
         </div>
-        { process.env.NODE_ENV==="development" && (
-        <div style={{position: "absolute", right: 0, top: 0, zIndex: 1002}} >
-          <Button type="primary" onClick={_ => addRemotes( {peerId: "testId", userName, stream: localStream } )}>add</Button>
-          <Button type="primary" onClick={_ => deleteRemotes( "testId" )}>delete</Button>
+      )}
+      { _remotes.length === 0 && (
+        <div>
+          <Alert 
+            description={<div>このURLを共有しよう： {window.location.href} <Button type="link" onClick={ _ => {
+              const listener = function(e){
+                e.clipboardData.setData("text/plain" , window.location.href);    
+                setCopied(true)
+                e.preventDefault();
+                document.removeEventListener("copy", listener);
+                setTimeout( _ => setCopied(false), 3000)
+              }
+              document.addEventListener("copy" , listener);
+              document.execCommand("copy")
+            }}><CopyOutlined /></Button>{ _copied && ' コピーしました' }</div>} 
+            message={<div>今この部屋にいるのは、あなただけです</div>}
+            showIcon 
+          />
         </div>
-        )}
+      )}
+      { _voiceOnly && (
+        <div>
+          <Alert message={<div>
+            4人を超えると、音声のみになります。
+          </div>} showIcon closable />
+        </div>
+      )}
+      <div>
+        <Row span={24}>
+        { _remotes.filter(o => !!o.stream ).map( (obj, idx) => (
+          <Col key={idx} span={24 / Math.ceil(Math.sqrt(_remotes.length))}>
+            <UserView showAudioWave={_voiceOnly} width="100%" userName={obj.userName} stream={obj.stream} />
+          </Col>
+        ))}
+        </Row>
       </div>
-    </Context.Provider>
+      { process.env.NODE_ENV==="development" && (
+      <div style={{position: "absolute", right: 40, top: 0, zIndex: 1002}} >
+        <Button type="primary" onClick={_ => addRemotes( {peerId: "testId", userName, stream: localStream } )}>add</Button>
+        <Button type="primary" onClick={_ => deleteRemotes( "testId" )}>delete</Button>
+      </div>
+      )}
+    </div>
   )
 }
 

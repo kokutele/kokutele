@@ -6,7 +6,7 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: scroll-y;
 }
 
 .App .container  {
@@ -41,3 +41,6 @@
   background-size: auto 100%;
 }
 
+.App .space {
+  height: 8px;
+}

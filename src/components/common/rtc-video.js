@@ -53,8 +53,8 @@ export default function(props) {
         _requestId.current = requestAnimationFrame(_draw)
       }
 
-      //ctx.strokeStyle = '#008b8b'
-      ctx.strokeStyle = '#f0e68c'
+      ctx.strokeStyle = '#008b8b'
+      //ctx.strokeStyle = '#f0e68c'
       _draw()
     }
     return function clean() {

@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from 'react'
-import { Alert, Space, Steps } from 'antd'
+import { Alert, Steps } from 'antd'
+import { VideoCameraOutlined, FormOutlined } from '@ant-design/icons'
+
 
 import Logo from '../common/logo'
 import ConnectVideo from './connect-video'
@@ -21,11 +23,12 @@ const descs = {
 
 const EnterStep = props => {
   const { step } = props
+  
   return (
-    <div style={{textAlign: "center"}}>
-      <Steps current={step}>
-        <Steps.Step />
-        <Steps.Step />
+    <div style={{textAlign: "center", maxWidth: 512, margin: "0 auto"}}>
+      <Steps current={step} progressDot>
+        <Steps.Step title={(<div>Step1. <VideoCameraOutlined /></div>)} />
+        <Steps.Step title={(<div>Step2. <FormOutlined /></div>)} />
       </Steps>
     </div>
   )
@@ -40,7 +43,8 @@ export default function Room( props ) {
   useEffect( _ => {
     if( state === "CONNECTED" && !_localStream ) {
       navigator.mediaDevices
-        .getUserMedia({ video: { width: 720, height: 480}, audio: true })
+        //.getUserMedia({ video: { width: 720, height: 480}, audio: true })
+        .getUserMedia({ video: true, audio: true })
         .then( stream => {
           console.log( stream )
           setLocalStream( stream )
@@ -55,32 +59,30 @@ export default function Room( props ) {
         <div className="tower">
           <div className="container">
             <div style={styleRoom}>
-              <Space direction="vertical">
-                { state === "IDLE" && (
-                  <Space direction="vertical">
-                    <Logo desc={descs[state]} />
-                    <EnterStep step={0} />
-                    <ConnectVideo onClick={ e=> {changeState("CONNECTED")}}/>
-                  </Space>
-                )}
-                { state === "CONNECTED" && (
-                  <Space direction="vertical">
-                    <Logo desc={descs[state]} />
-                    <EnterStep step={1} />
-                    { !!mesg && (
-                      <Alert mesg={mesg} />
-                    )}
-                    <Enter stream={_localStream} onFinish={e => {
-                      console.log(e)
-                      setUserName(e.username)
-                      changeState('ENTERED')
-                    }} onError={setMessage} />
-                  </Space>
-                )}
-                { state === "ENTERED" && (
-                  <VideoRoom localStream={_localStream} userName={_userName} roomId={props.roomId} type={props.type} />
-                )}
-              </Space>
+              { state === "IDLE" && (
+                <div>
+                  <Logo desc={descs[state]} />
+                  <EnterStep step={0} />
+                  <ConnectVideo onClick={ e=> {changeState("CONNECTED")}}/>
+                </div>
+              )}
+              { state === "CONNECTED" && (
+                <div>
+                  <Logo desc={descs[state]} />
+                  <EnterStep step={1} />
+                  { !!mesg && (
+                    <Alert mesg={mesg} />
+                  )}
+                  <Enter stream={_localStream} onFinish={e => {
+                    console.log(e)
+                    setUserName(e.username)
+                    changeState('ENTERED')
+                  }} onError={setMessage} />
+                </div>
+              )}
+              { state === "ENTERED" && (
+                <VideoRoom localStream={_localStream} userName={_userName} roomId={props.roomId} type={props.type} />
+              )}
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Form, Input, Button, Space } from 'antd'
+import { Form, Input, Button } from 'antd'
 import { ImportOutlined } from '@ant-design/icons'
 import RTCVideo from '../common/rtc-video'
 
@@ -22,9 +22,10 @@ const tailLayout = {
 export default function(props) {
   const { stream, onFinish, onError } = props
   return (
-    <div className="Enter" style={{ textAlign: "left" }}>
-      <Space direction="vertical">
-        <RTCVideo stream={stream} muted={true} width="512px" />
+    <div className="Enter" style={{ textAlign: "center", maxWidth: 512, margin: "8px auto" }}>
+      <RTCVideo stream={stream} muted={true} width="100%" />
+      <div className="space" />
+      <div style={{textAlign: "left"}}>
         <Form
           {...layout}
           name="enter-room"
@@ -52,7 +53,7 @@ export default function(props) {
             </Button>
           </Form.Item>
         </Form>
-      </Space>
+      </div>
     </div>
   )
 }
