@@ -8,12 +8,12 @@ https://conf.kokutele.com/
 ## how to develop
 
 ```
-$ REACT_APP_APIKEY=<your skyway apikey> node start
+$ REACT_APP_APIKEY=<your skyway apikey> npm start
 ```
 
 ## how to build
 
 ```
-$ REACT_APP_APIKEY=<your skyway apikey> node build
+$ REACT_APP_APIKEY=<your skyway apikey> npm build
 ```
 
