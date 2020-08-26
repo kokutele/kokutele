@@ -38,7 +38,7 @@ export default function() {
               <div style={{ textAlign: "left"}}>
                 <Title level={2}>Links</Title>
                 <ul>
-                  <li><a href="https://medium.com/@komasshu" target="_blank" rel="noopener noreferrer">ブログ</a></li>
+                  <li><a href="https://medium.com/kokutele" target="_blank" rel="noopener noreferrer">ブログ</a></li>
                   <li><a href="https://www.facebook.com/groups/307692313780090" target="_blank" rel="noopener noreferrer">Facebookグループ</a></li>
                   <li><a href="https://github.com/kokutele/kokutele" target="_blank" rel="noopener noreferrer">Github - kokutele -</a></li>
                 </ul>
