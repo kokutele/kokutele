@@ -16,9 +16,8 @@ const { Title } = Typography
 
 
 export default function() {
-  const handleCreate = useCallback( _ => {
+  const handleCreate = useCallback( (type = 'audio') => {
     const roomId = uuidv4()
-    const type="small"
 
     window.location = `./?r=${roomId}&entered=false&type=${type}`
   }, [])
@@ -30,8 +29,11 @@ export default function() {
             <div className="top" style={styleTop}>
               <Space direction="vertical">
                 <Logo desc="国産で、誰でも無料で使える安心テレカン" />
-                <Button icon={<ArrowRightOutlined />} onClick={handleCreate} type="primary" shape="round" size="large">
-                  create room
+                <Button icon={<ArrowRightOutlined />} onClick={e => handleCreate('small')} type="primary" shape="round" size="large">
+                  create small room
+                </Button>
+                <Button icon={<ArrowRightOutlined />} onClick={e => handleCreate('audio')} type="primary" shape="round" size="large">
+                  create audio room
                 </Button>
               </Space>
               <Divider />

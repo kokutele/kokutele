@@ -1,7 +1,8 @@
-import React from 'react'
-import { Form, Input, Button } from 'antd'
-import { ImportOutlined } from '@ant-design/icons'
+import React, { useState } from 'react'
+import { Form, Input, Button, Modal } from 'antd' 
+import { ImportOutlined, CameraOutlined } from '@ant-design/icons'
 import RTCVideo from '../common/rtc-video'
+import ThumbnailEditor from '../common/thumbnail-editor'
 
 const layout = {
   labelCol: {
@@ -14,23 +15,52 @@ const layout = {
 
 const tailLayout = {
   wrapperCol: {
-    offset: 8,
-    span: 16,
+    offset: 0,
+    span: 24,
   },
 };
 
 export default function(props) {
-  const { stream, onFinish, onError } = props
+  const { stream, type, onFinish, onError } = props
+  const [visible, setVisible] = useState(false)
+  const [thumbnail, setThumbnail] = useState('')
+  const [userName, setUserName] = useState('')
+
   return (
     <div className="Enter" style={{ textAlign: "center", maxWidth: 512, margin: "8px auto" }}>
-      <RTCVideo stream={stream} muted={true} width="100%" />
+      <RTCVideo type={type} thumbnail={thumbnail} stream={stream} muted={true} width="100%" userName={userName} />
+      { (type==="audio" && visible) && (
+      <div>
+        <Modal
+          visible={visible}
+          onOk={_ => setVisible(false)}
+          onCancel={_ => setVisible(false)}
+        >
+          <ThumbnailEditor stream={stream} wiedth="100%" setThumbnail={setThumbnail}/>
+        </Modal>
+      </div>
+      )}
+      { (type==="audio") && (
+        <div>
+          <div className="space" />
+          <div style={{textAlign: "center"}}>
+            <Button 
+              onClick={ _ => setVisible(true)}
+              type="default"
+              shape="round"
+              icon={<CameraOutlined />}
+              danger
+            >generate thumbnail</Button>
+          </div>
+        </div>
+      )}
       <div className="space" />
       <div style={{textAlign: "left"}}>
         <Form
           {...layout}
           name="enter-room"
           initialValues={{
-            username: ''
+            username: userName
           }}
           onFinish={onFinish}
           onFinishFailed={onError}
@@ -45,9 +75,9 @@ export default function(props) {
             },
           ]}
           >
-            <Input placeholder="名前を入力して下さい" />
+            <Input placeholder="名前を入力して下さい" onChange={e => setUserName( e.target.value) }/>
           </Form.Item>
-          <Form.Item {...tailLayout}>
+          <Form.Item {...tailLayout} style={{textAlign: 'center'}}>
             <Button type="primary" shape="round" icon={<ImportOutlined />} size="large" htmlType="submit">
               Enter
             </Button>

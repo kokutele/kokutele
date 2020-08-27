@@ -74,12 +74,15 @@ export default function Room( props ) {
                       <Alert type="error" showIcon message={mesg} />
                     </div>
                   )}
-                  <EnterStep step={1} />
-                  <Enter stream={_localStream} onFinish={e => {
-                    console.log(e)
-                    setUserName(e.username)
-                    changeState('ENTERED')
-                  }} onError={setMessage} />
+                  <EnterStep step={1} type={props.type} />
+                  <Enter 
+                    stream={_localStream} onFinish={e => {
+                      setUserName(e.username)
+                      changeState('ENTERED')
+                    }} 
+                    onError={setMessage} 
+                    type={props.type}
+                  />
                 </div>
               )}
               { state === "ENTERED" && (

@@ -31,3 +31,26 @@
     right: 0;
     left: 0;
 }
+
+.img-ratio-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #999;
+}
+
+.img-ratio-wrapper:after {
+  padding-top: 56.25%;
+  /* 16:9 ratio */
+  display: block;
+  content: '';
+}
+
+.video-ratio-wrapper img {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
