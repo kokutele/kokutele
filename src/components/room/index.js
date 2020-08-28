@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import { Alert, Steps } from 'antd'
+
+import { validateRoomId, validateType } from '../../libs/util'
 import { VideoCameraOutlined, FormOutlined } from '@ant-design/icons'
 
 
@@ -35,9 +37,21 @@ const EnterStep = props => {
 }
 
 export default function Room( props ) {
+  const { roomId, type } = props
   const [state, changeState] = useState("IDLE")
   const [mesg, setMessage] = useState('')
   const [_localStream, setLocalStream ] = useState( null )
+
+  useEffect( _ => {
+    if( !validateRoomId(roomId) ) {
+      setMessage("`roomId` が不正です")
+      changeState("ERROR")
+    }
+    if( !validateType(type) ) {
+      setMessage("`type` が不正です")
+      changeState("ERROR")
+    }
+  }, [roomId, type])
 
   useEffect( _ => {
     if( state === "CONNECTED" && !_localStream ) {
@@ -56,6 +70,9 @@ export default function Room( props ) {
       <main>
         <div className="tower">
           <div className="container">
+            { state === "ERROR" && (
+              <Alert type="error" showIcon message={mesg} />
+            )}
             <div style={styleRoom}>
               { state === "IDLE" && (
                 <div>
