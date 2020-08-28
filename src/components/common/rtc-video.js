@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 
 import { Avatar } from 'antd'
 
+
 import './rtc-video.css'
 
 // fixup vendor prefix
@@ -13,7 +14,7 @@ export default function(props) {
   const _canvas = useRef()
   const _requestId = useRef()
   let _finished = false
-  const { stream, width, type, muted, thumbnail } = props
+  const { stream, width, type, muted, thumbnail, avatarBgColor } = props
   const userName = !!props.userName ? props.userName : "名無しさん"
 
   useEffect( _ => {
@@ -110,11 +111,10 @@ export default function(props) {
           </div>
         ):(
           <div style={avatarStyle} >
-          {/* <div style={{position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}> */}
             <Avatar
               size={48}
               style={{
-                backgroundColor: '#903E84',
+                backgroundColor: avatarBgColor,
                 verticalAlign: 'middle',
               }}
             >{displayName}</Avatar>

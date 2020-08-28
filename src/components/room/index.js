@@ -45,7 +45,6 @@ export default function Room( props ) {
         //.getUserMedia({ video: { width: 720, height: 480}, audio: true })
         .getUserMedia({ video: true, audio: true })
         .then( stream => {
-          console.log( stream )
           setLocalStream( stream )
         })
         .catch( err => setMessage(err.message) )

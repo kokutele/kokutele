@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Form, Input, Button, Modal } from 'antd' 
+import { Form, Avatar, Input, Button, Radio, Modal } from 'antd' 
 import { ImportOutlined, CameraOutlined } from '@ant-design/icons'
 import RTCVideo from '../common/rtc-video'
 import ThumbnailEditor from '../common/thumbnail-editor'
-import { setUserName, setThumbnail, selectUserName } from './room-slice'
+import { setUserName, setThumbnail, selectUserName, avatarColors, setAvatarColorName, selectAvatarColor, selectAvatarColorName } from './room-slice'
 
 const layout = {
   labelCol: {
@@ -29,16 +29,19 @@ export default function(props) {
   const [userName, _setUserName] = useState( useSelector(selectUserName))
 
   const dispatch = useDispatch()
+  const avatarBgColor = useSelector( selectAvatarColor )
+  const avatarColorName = useSelector( selectAvatarColorName )
 
   const handleFinish = useCallback( e => {
     dispatch(setUserName(e.username))
     dispatch(setThumbnail(thumbnail))
+    dispatch(setAvatarColorName(avatarColorName))
     onFinish()
-  }, [onFinish, thumbnail, dispatch])
+  }, [onFinish, thumbnail, dispatch, avatarColorName])
 
   return (
     <div className="Enter" style={{ textAlign: "center", maxWidth: 512, margin: "8px auto" }}>
-      <RTCVideo type={type} thumbnail={thumbnail} stream={stream} muted={true} width="100%" userName={userName} />
+      <RTCVideo type={type} thumbnail={thumbnail} avatarBgColor={avatarBgColor} stream={stream} muted={true} width="100%" userName={userName} />
       { (type==="audio" && visible) && (
       <div>
         <Modal
@@ -72,9 +75,31 @@ export default function(props) {
           initialValues={{
             username: userName
           }}
-          onFinish={handleFinish}
+          onFinish={ handleFinish}
           onFinishFailed={onError}
         >
+          <Form.Item
+            label="Color"
+            name="avatarColorName"
+            rules={[{
+              required: false, // since true makes error...
+              message: 'アバターの色を選択して下さい'
+            }]}>
+            <div style={{textAlign: "center"}}>
+            <Radio.Group onChange={ e => (dispatch(setAvatarColorName(e.target.value))) } value={avatarColorName}>
+              { Object.entries(avatarColors).map( ([name, code], idx) => (
+              <Radio key={idx} value={name}>
+                <Avatar 
+                  style={{
+                    backgroundColor: code,
+                  }}
+                />
+              </Radio>
+              ))}
+            </Radio.Group>
+            </div>
+          </Form.Item>
+          
           <Form.Item
             label="Username"
             name="username"
