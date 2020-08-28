@@ -13,7 +13,7 @@ export default function(props) {
   const _canvas = useRef()
   const _requestId = useRef()
   let _finished = false
-  const { stream, width, showAudioWave, type, muted, thumbnail } = props
+  const { stream, width, type, muted, thumbnail } = props
   const userName = !!props.userName ? props.userName : "名無しさん"
 
   useEffect( _ => {
@@ -84,21 +84,24 @@ export default function(props) {
       _video.current.srcObject = stream
     }
   }, [_video, stream])
-  const _show = showAudioWave === undefined ? false : showAudioWave
-  const display = _show ? "none" : "block"
 
   const temp = userName.split(" ")
   const displayName = temp.length > 1 ? temp.map( s => s.slice(0,1) ).join("") : temp[0].slice(0,2)
+
+  const avatarStyle = type==="audio" ?
+    {position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" } :
+    {position: "absolute", top: 5, left: 5 }
+
 
   return (
     <div className="RTCVideo">
       <div className="video-ratio-wrapper" ref={e => _wrapper.current = e} style={{ width }}>
         <canvas ref={e => _canvas.current = e} width="100%" height="100%"></canvas>
         { type!=="audio" ? (
-          <video ref={e => _video.current = e} style={{ display }} muted={!!muted} autoPlay playsInline />
+          <video ref={e => _video.current = e} muted={!!muted} autoPlay playsInline />
         ):(
           <div>
-            <audio ref={e => _video.current = e} style={{ display }} muted={!!muted} autoPlay playsInline />
+            <audio ref={e => _video.current = e} muted={!!muted} autoPlay playsInline />
           </div>
         )}
         { (thumbnail && thumbnail !== '') ? (
@@ -106,7 +109,8 @@ export default function(props) {
             <img src={thumbnail} alt="thumbnail" />
           </div>
         ):(
-          <div style={{position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center"}}>
+          <div style={avatarStyle} >
+          {/* <div style={{position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center" }}> */}
             <Avatar
               size={48}
               style={{
