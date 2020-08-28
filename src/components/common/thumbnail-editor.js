@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 import { Button } from 'antd'
 import { CameraOutlined } from '@ant-design/icons'
@@ -8,10 +8,9 @@ import './rtc-video.css'
 export default function(props) {
   const _video = useRef()
   const _canvas = useRef()
-  const _img = useRef()
   const _canvasBack = useRef()
   const { stream, width, setThumbnail } = props
-  const _thumbnail = useRef('')
+  const [thumbnail, _setThumbnail] = useState('')
 
   useEffect( _ => {
     if( _canvas.current && _video.current ) {
@@ -54,13 +53,12 @@ export default function(props) {
 
   const handleClick = useCallback( _ => {
     const cvs = _canvas.current
-    const img = _img.current
-    if( cvs && img ) {
-      _thumbnail.current = cvs.toDataURL('image/png')
-      img.src = _thumbnail.current
-      if( setThumbnail ) setThumbnail(_thumbnail.current)
+    if( cvs ) {
+      const _thumbnail = cvs.toDataURL('image/png')
+      if( _setThumbnail ) _setThumbnail(_thumbnail )
+      if( setThumbnail ) setThumbnail(_thumbnail)
     } 
-  }, [_canvas, _img, _thumbnail, setThumbnail])
+  }, [_canvas, _setThumbnail, setThumbnail])
 
   const visibility = 'visible' // 'hidden'
 
@@ -81,9 +79,11 @@ export default function(props) {
           onClick={handleClick}
         />
       </div>
+      { !!thumbnail && (
       <div>
-        <img ref={e => _img.current = e} alt="thubmnail" />
+        <img src={thumbnail} alt="thubmnail" />
       </div>
+      )}
     </div>
   )
 }

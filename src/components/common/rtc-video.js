@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
+import { Avatar } from 'antd'
+
 import './rtc-video.css'
 
 // fixup vendor prefix
@@ -11,7 +13,8 @@ export default function(props) {
   const _canvas = useRef()
   const _requestId = useRef()
   let _finished = false
-  const { stream, width, showAudioWave, type, muted, thumbnail, userName } = props
+  const { stream, width, showAudioWave, type, muted, thumbnail } = props
+  const userName = !!props.userName ? props.userName : "名無しさん"
 
   useEffect( _ => {
     if( _canvas && _wrapper && stream ) {
@@ -59,7 +62,7 @@ export default function(props) {
             ctx.stroke()
           })
 
-          ctx.fillText(userName || '名無しさん', Math.ceil( w / 2 ), Math.ceil(0.9 * h), w);
+          ctx.fillText(userName, Math.ceil( w / 2 ), Math.ceil(0.05 * h), w);
         }
 
         _requestId.current = requestAnimationFrame(_draw)
@@ -67,9 +70,8 @@ export default function(props) {
 
       ctx.fillStyle = '#fff'
       ctx.font = "1em 'ＭＳ ゴシック'";
-      ctx.textBaseline='bottom'
+      ctx.textBaseline='top'
       ctx.textAlign='center'
-      //ctx.strokeStyle = '#f0e68c'
       _draw()
     }
     return function clean() {
@@ -85,6 +87,9 @@ export default function(props) {
   const _show = showAudioWave === undefined ? false : showAudioWave
   const display = _show ? "none" : "block"
 
+  const temp = userName.split(" ")
+  const displayName = temp.length > 1 ? temp.map( s => s.slice(0,1) ).join("") : temp[0].slice(0,2)
+
   return (
     <div className="RTCVideo">
       <div className="video-ratio-wrapper" ref={e => _wrapper.current = e} style={{ width }}>
@@ -96,9 +101,19 @@ export default function(props) {
             <audio ref={e => _video.current = e} style={{ display }} muted={!!muted} autoPlay playsInline />
           </div>
         )}
-        { thumbnail !=='' && (
+        { (thumbnail && thumbnail !== '') ? (
           <div>
             <img src={thumbnail} alt="thumbnail" />
+          </div>
+        ):(
+          <div style={{position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center"}}>
+            <Avatar
+              size={48}
+              style={{
+                backgroundColor: '#903E84',
+                verticalAlign: 'middle',
+              }}
+            >{displayName}</Avatar>
           </div>
         )}
       </div>

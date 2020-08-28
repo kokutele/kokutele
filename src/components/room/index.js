@@ -38,7 +38,6 @@ export default function Room( props ) {
   const [state, changeState] = useState("IDLE")
   const [mesg, setMessage] = useState('')
   const [_localStream, setLocalStream ] = useState( null )
-  const [_userName, setUserName ] = useState( '' )
 
   useEffect( _ => {
     if( state === "CONNECTED" && !_localStream ) {
@@ -77,7 +76,6 @@ export default function Room( props ) {
                   <EnterStep step={1} type={props.type} />
                   <Enter 
                     stream={_localStream} onFinish={e => {
-                      setUserName(e.username)
                       changeState('ENTERED')
                     }} 
                     onError={setMessage} 
@@ -86,7 +84,7 @@ export default function Room( props ) {
                 </div>
               )}
               { state === "ENTERED" && (
-                <VideoRoom localStream={_localStream} userName={_userName} roomId={props.roomId} type={props.type} />
+                <VideoRoom localStream={_localStream} roomId={props.roomId} type={props.type} />
               )}
             </div>
           </div>

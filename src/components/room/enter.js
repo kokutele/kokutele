@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Form, Input, Button, Modal } from 'antd' 
 import { ImportOutlined, CameraOutlined } from '@ant-design/icons'
 import RTCVideo from '../common/rtc-video'
 import ThumbnailEditor from '../common/thumbnail-editor'
+import { setUserName, setThumbnail, selectUserName } from './room-slice'
 
 const layout = {
   labelCol: {
@@ -23,8 +25,16 @@ const tailLayout = {
 export default function(props) {
   const { stream, type, onFinish, onError } = props
   const [visible, setVisible] = useState(false)
-  const [thumbnail, setThumbnail] = useState('')
-  const [userName, setUserName] = useState('')
+  const [thumbnail, _setThumbnail] = useState('')
+  const [userName, _setUserName] = useState( useSelector(selectUserName))
+
+  const dispatch = useDispatch()
+
+  const handleFinish = useCallback( e => {
+    dispatch(setUserName(e.username))
+    dispatch(setThumbnail(thumbnail))
+    onFinish()
+  }, [onFinish, thumbnail, dispatch])
 
   return (
     <div className="Enter" style={{ textAlign: "center", maxWidth: 512, margin: "8px auto" }}>
@@ -36,7 +46,7 @@ export default function(props) {
           onOk={_ => setVisible(false)}
           onCancel={_ => setVisible(false)}
         >
-          <ThumbnailEditor stream={stream} wiedth="100%" setThumbnail={setThumbnail}/>
+          <ThumbnailEditor stream={stream} wiedth="100%" setThumbnail={_setThumbnail}/>
         </Modal>
       </div>
       )}
@@ -50,7 +60,7 @@ export default function(props) {
               shape="round"
               icon={<CameraOutlined />}
               danger
-            >generate thumbnail</Button>
+            >set thumbnail</Button>
           </div>
         </div>
       )}
@@ -62,7 +72,7 @@ export default function(props) {
           initialValues={{
             username: userName
           }}
-          onFinish={onFinish}
+          onFinish={handleFinish}
           onFinishFailed={onError}
         >
           <Form.Item
@@ -75,7 +85,7 @@ export default function(props) {
             },
           ]}
           >
-            <Input placeholder="名前を入力して下さい" onChange={e => setUserName( e.target.value) }/>
+            <Input placeholder="名前を入力して下さい" onChange={e => _setUserName( e.target.value) }/>
           </Form.Item>
           <Form.Item {...tailLayout} style={{textAlign: 'center'}}>
             <Button type="primary" shape="round" icon={<ImportOutlined />} size="large" htmlType="submit">

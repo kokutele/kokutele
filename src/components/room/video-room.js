@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Avatar, Alert, Button, Col, Row } from 'antd'
+import { useSelector } from 'react-redux'
+import { selectUserName, selectThumbnail } from './room-slice'
+import { Alert, Button, Col, Row } from 'antd'
 import { AudioOutlined, AudioMutedOutlined, CopyOutlined, UsergroupAddOutlined } from '@ant-design/icons'
 
 import SkywayHandler from '../../libs/skyway-handler'
@@ -7,8 +9,8 @@ import RTCVideo from '../common/rtc-video'
 
 const UserView = props => {
   const { stream, width, userName, showAudioWave, muted } = props
-  const displayName = userName.split(" ").map( s => s.slice(0,1) ).join("")
 
+  // todo - change type according to type
   return (
     <div style={{position: "relative"}}>
       <RTCVideo 
@@ -17,15 +19,9 @@ const UserView = props => {
         style={{position: "absolute", zIndex: 1000}}
         showAudioWave={showAudioWave}
         muted={muted}
+        userName={userName}
+        type="audio"
       />
-      <div style={{position: "absolute", zIndex: 1001, top: 5, left: 5}}>
-        <Avatar
-          style={{
-            backgroundColor: '#f00',
-            verticalAlign: 'middle',
-          }}
-        >{displayName}</Avatar>
-      </div>
     </div>
   )
 }
@@ -303,10 +299,12 @@ const ShareAlert = props => {
 
 
 export default function(props) {
-  const { localStream, userName } = props
+  const { localStream, type } = props
   const [micEnabled, setMicEnabled] = useState(true)
   const [_voiceOnly, setVoiceOnly] = useState(false)
   const [_showShareAlert, setShowShareAlert] = useState(false)
+  const userName = useSelector(selectUserName)
+    , thumbnail = useSelector(selectThumbnail)
 
   useEffect( _ => {
     const tracks = localStream.getAudioTracks()
@@ -316,7 +314,7 @@ export default function(props) {
   return(
     <div className="VideoRoom">
       <RemoteView {...props} onExceeds={setVoiceOnly} />
-      <LocalView voiceOnly={_voiceOnly} stream={localStream} userName={userName} width={160} />
+      <LocalView voiceOnly={_voiceOnly} stream={localStream} userName={userName} width={160} type={type} thumbnail={thumbnail} />
       <MicMuteButton enabled={micEnabled} onClick={setMicEnabled} />
       <ShareButton onClick={_ => setShowShareAlert(true)}/>
       { _showShareAlert && (
