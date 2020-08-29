@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Form, Avatar, Input, Button, Radio, Modal } from 'antd' 
-import { ImportOutlined, CameraOutlined } from '@ant-design/icons'
+import { Form, Avatar, Input, Button, Radio, Switch, Modal } from 'antd' 
+import { ImportOutlined, CameraOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
 import RTCVideo from '../common/rtc-video'
 import ThumbnailEditor from '../common/thumbnail-editor'
 import { setUserName, setThumbnail, selectUserName, avatarColors, setAvatarColorName, selectAvatarColor, selectAvatarColorName } from './room-slice'
@@ -27,6 +27,7 @@ export default function(props) {
   const [visible, setVisible] = useState(false)
   const [thumbnail, _setThumbnail] = useState('')
   const [userName, _setUserName] = useState( useSelector(selectUserName))
+  const [_useBustUp, setUseBustUp] = useState(true)
 
   const dispatch = useDispatch()
   const avatarBgColor = useSelector( selectAvatarColor )
@@ -49,7 +50,12 @@ export default function(props) {
           onOk={_ => setVisible(false)}
           onCancel={_ => setVisible(false)}
         >
-          <ThumbnailEditor stream={stream} wiedth="100%" setThumbnail={_setThumbnail}/>
+          <ThumbnailEditor 
+            stream={stream} 
+            wiedth="100%" 
+            setThumbnail={_setThumbnail}
+            useBustUp={_useBustUp}
+          />
         </Modal>
       </div>
       )}
@@ -64,6 +70,13 @@ export default function(props) {
               icon={<CameraOutlined />}
               danger
             >set thumbnail</Button>
+            &nbsp;
+            <Switch 
+              checkedChildren={<UserOutlined/>}
+              unCheckedChildren={<SmileOutlined/>}
+              checked={_useBustUp}
+              onChange={setUseBustUp}
+            />
           </div>
         </div>
       )}

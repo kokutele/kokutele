@@ -1,49 +1,57 @@
+// @flow
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 import { Button } from 'antd'
 import { CameraOutlined } from '@ant-design/icons'
 
+import ThumbnailRenderer from '../../libs/thumbnail-renderer'
+import BustTopRenderer from '../../libs/bust-top-renderer'
+
 import './rtc-video.css'
 
-export default function(props) {
-  const _video = useRef()
-  const _canvas = useRef()
-  const _canvasBack = useRef()
-  const { stream, width, setThumbnail } = props
-  const [thumbnail, _setThumbnail] = useState('')
+type PropTypes = {
+  stream: MediaStream;
+  width: number; // output video width
+  setThumbnail: Function; // aims to return thumbnail image
+  useBustUp: boolean;
+}
+
+export default function(props:PropTypes):Object {
+  const _video:Object = useRef()
+  const _canvas:Object = useRef()
+  const _canvasBack:Object = useRef()
+  const _renderer:Object = useRef(null)
+
+  const { 
+    stream, 
+    width, 
+    setThumbnail,
+    useBustUp,
+  }:PropTypes = props
+
+  const [
+    thumbnail:string, _setThumbnail:Function
+  ] = useState('')
 
   useEffect( _ => {
     if( _canvas.current && _video.current ) {
-      const cvs = _canvas.current
-        , video = _video.current
-      cvs.width = video.offsetWidth
-      cvs.height = video.offsetHeight
+      const canvas:HTMLCanvasElement = _canvas.current
+        , video:HTMLVideoElement  = _video.current
+      canvas.width = video.offsetWidth
+      canvas.height = video.offsetHeight
 
-      const ctx = cvs.getContext('2d')
+      //const renderer = ThumbnailRenderer.create({
+      _renderer.current = useBustUp ?
+        BustTopRenderer.create({
+          video, canvas
+        }):
+        ThumbnailRenderer.create({
+          video, canvas
+        })
 
-      const _draw = _ => {
-        if( video.videoHeight !== 0) {
-          const ratio = video.offsetHeight / video.videoHeight
-          const w = cvs.offsetWidth
-            , h = cvs.height
-            , r = Math.ceil( h / 4 )
-            , _w = Math.ceil( video.videoWidth * ratio)
-
-          ctx.beginPath()
-          ctx.strokeStyle = '#ccc'
-          ctx.arc( Math.ceil( w / 2 ), Math.ceil( h / 2 ), r, 0, 2 * Math.PI, false)
-          ctx.clip()
-          ctx.drawImage( video, 0, 0, video.videoWidth, video.videoHeight, Math.ceil( (w - _w) / 2 ), 0, Math.ceil( _w), h)
-
-          // const base64 = cvs.toDataURL('image/png')
-          // _img.current.src = base64
-        }
-
-        requestAnimationFrame(_draw)
-      }
-      _draw()
+      _renderer.current.start()
     }
-  }, [_canvas, _video, _canvasBack])
+  }, [_canvas, _video, _canvasBack, useBustUp])
 
   useEffect( _ => {
     if( stream ) {
@@ -51,16 +59,21 @@ export default function(props) {
     }
   }, [_video, stream])
 
-  const handleClick = useCallback( _ => {
-    const cvs = _canvas.current
+  const handleClick:Function = useCallback( _ => {
+    const cvs:HTMLCanvasElement = _canvas.current
     if( cvs ) {
-      const _thumbnail = cvs.toDataURL('image/png')
+      const _thumbnail:string = cvs.toDataURL('image/png')
       if( _setThumbnail ) _setThumbnail(_thumbnail )
-      if( setThumbnail ) setThumbnail(_thumbnail)
+      if( setThumbnail  ) setThumbnail(_thumbnail )
+
+      if( _renderer.current && typeof _renderer.current.stop === 'function' ) {
+        _renderer.current.stop()
+        _renderer.current = null
+      }
     } 
   }, [_canvas, _setThumbnail, setThumbnail])
 
-  const visibility = 'visible' // 'hidden'
+  const visibility:string = 'visible' // 'hidden'
 
   return (
     <div className="ThumbnailEditor">
