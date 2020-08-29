@@ -1,10 +1,20 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Form, Avatar, Input, Button, Radio, Switch, Modal } from 'antd' 
 import { ImportOutlined, CameraOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
+
 import RTCVideo from '../common/rtc-video'
 import ThumbnailEditor from '../common/thumbnail-editor'
-import { setUserName, setThumbnail, selectUserName, avatarColors, setAvatarColorName, selectAvatarColor, selectAvatarColorName } from './room-slice'
+import { 
+  setUserName, 
+  setThumbnail, 
+  selectUserName, 
+  avatarColors, 
+  setAvatarColorName, 
+  selectAvatarColor, 
+  selectAvatarColorName,
+  selectIsMobile,
+} from './room-slice'
 
 const layout = {
   labelCol: {
@@ -28,6 +38,14 @@ export default function(props) {
   const [thumbnail, _setThumbnail] = useState('')
   const [userName, _setUserName] = useState( useSelector(selectUserName))
   const [_useBustUp, setUseBustUp] = useState(true)
+  const [disableSwitch, setDisableSwitch] = useState( false )
+
+  const isMobile = useSelector( selectIsMobile )
+
+  useEffect( () => {
+    setDisableSwitch(isMobile)
+    setUseBustUp(!isMobile)
+  }, [isMobile])
 
   const dispatch = useDispatch()
   const avatarBgColor = useSelector( selectAvatarColor )
@@ -76,6 +94,7 @@ export default function(props) {
               unCheckedChildren={<SmileOutlined/>}
               checked={_useBustUp}
               onChange={setUseBustUp}
+              disabled={disableSwitch}
             />
           </div>
         </div>

@@ -14,7 +14,13 @@ export const roomSlice = createSlice({
   initialState: {
     userName: '名無しさん',
     thumbnail: '',
-    avatarColorName: 'purple'
+    avatarColorName: 'purple',
+    platform: {
+      product: '',
+      name: '',
+      version: '',
+      isMobile: false
+    }
   },
   reducers: {
     setUserName: (state, action) => {
@@ -25,6 +31,10 @@ export const roomSlice = createSlice({
     },
     setAvatarColorName: (state, action) => {
       state.avatarColorName = action.payload
+    },
+    setPlatform: (state, action) => {
+      const {product, name, version, isMobile} = action.payload
+      state.platform = {product, name, version, isMobile}
     }
   },
 });
@@ -33,6 +43,7 @@ export const {
   setUserName,
   setThumbnail,
   setAvatarColorName,
+  setPlatform,
 } = roomSlice.actions;
 
 export const selectUserName = state => state.room.userName
@@ -42,5 +53,6 @@ export const selectAvatarColor = state => {
   const name = state.room.avatarColorName
   return avatarColors[name]
 }
+export const selectIsMobile = state => !!state.room.platform.isMobile
 
 export default roomSlice.reducer;

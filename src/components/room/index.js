@@ -1,8 +1,11 @@
 import React, {useState, useEffect} from 'react'
+import { useDispatch } from 'react-redux'
 import { Alert, Steps } from 'antd'
 
-import { validateRoomId, validateType } from '../../libs/util'
+import { validateRoomId, validateType, getPlatform } from '../../libs/util'
 import { VideoCameraOutlined, FormOutlined } from '@ant-design/icons'
+
+import { setPlatform } from './room-slice'
 
 
 import Logo from '../common/logo'
@@ -41,6 +44,13 @@ export default function Room( props ) {
   const [state, changeState] = useState("IDLE")
   const [mesg, setMessage] = useState('')
   const [_localStream, setLocalStream ] = useState( null )
+
+  const dispatch = useDispatch()
+
+  useEffect( () => {
+    const {product, name, version, isMobile} = getPlatform()
+    dispatch( setPlatform({product, name, version, isMobile}))
+  }, [ dispatch ])
 
   useEffect( _ => {
     if( !validateRoomId(roomId) ) {

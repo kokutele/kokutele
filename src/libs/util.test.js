@@ -1,7 +1,8 @@
 import {
   types,
   validateRoomId,
-  validateType
+  validateType,
+  isMobile,
 } from './util'
 
 describe('types', () => {
@@ -37,5 +38,19 @@ describe('#validateType()', () => {
     expect( validateType(null) ).toBe(false)
     expect( validateType('hoge') ).toBe(false)
   })
+})
 
+describe('isMobile', () => {
+  test('productが`iPhone`なら true', () => {
+    expect(isMobile({product: 'iPhone'})).toBe(true)
+  })
+  test('productが`iPad`なら true', () => {
+    expect(isMobile({product: 'iPad'})).toBe(true)
+  })
+  test('nameが`Chrome Mobile`なら true', () => {
+    expect(isMobile({name: 'Chrome Mobile'})).toBe(true)
+  })
+  test('nameが`Chrome`なら false', () => {
+    expect(isMobile({name: 'Chrome'})).toBe(false)
+  })
 })
