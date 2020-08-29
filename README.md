@@ -9,3 +9,15 @@
 ```
 $ REACT_APP_APIKEY=<your skyway apikey> node start
 ```
+
+## test
+
+```
+$ npm test
+```
+
+## static analytics
+
+```
+$ npm run flow
+```
