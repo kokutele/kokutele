@@ -1,31 +1,28 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Avatar, Alert, Button, Col, Row } from 'antd'
+import { useSelector } from 'react-redux'
+import { selectUserName, selectThumbnail, selectAvatarColor } from './room-slice'
+import { Alert, Button, Col, Row } from 'antd'
 import { AudioOutlined, AudioMutedOutlined, CopyOutlined, UsergroupAddOutlined } from '@ant-design/icons'
 
 import SkywayHandler from '../../libs/skyway-handler'
 import RTCVideo from '../common/rtc-video'
 
 const UserView = props => {
-  const { stream, width, userName, showAudioWave, muted } = props
-  const displayName = userName.split(" ").map( s => s.slice(0,1) ).join("")
+  const { stream, width, type, thumbnail, userName, muted, avatarBgColor } = props
 
+  // todo - change type according to type
   return (
     <div style={{position: "relative"}}>
       <RTCVideo 
         stream={stream} 
         width={width} 
         style={{position: "absolute", zIndex: 1000}}
-        showAudioWave={showAudioWave}
         muted={muted}
+        userName={userName}
+        type={type}
+        thumbnail={thumbnail}
+        avatarBgColor={avatarBgColor}
       />
-      <div style={{position: "absolute", zIndex: 1001, top: 5, left: 5}}>
-        <Avatar
-          style={{
-            backgroundColor: '#f00',
-            verticalAlign: 'middle',
-          }}
-        >{displayName}</Avatar>
-      </div>
     </div>
   )
 }
@@ -48,18 +45,17 @@ const LocalView = props => {
 }
 
 const RemoteView = props => {
-  const { roomId, userName, localStream, onExceeds } = props
+  const { roomId, userName, localStream, type, avatarBgColor, thumbnail } = props
   const [_remotes, setRemotes] = useState([])
   const [ _errMessage, setErrMessage ] = useState('')
-  const [ _voiceOnly, setVoiceOnly ] = useState(false)
   const [ _copied, setCopied ] = useState(false)
-
-  //const _api = useRef( notification.useNotification() )
 
   /**
    * @params {Object} remoteObj
    * @params {string} remoteObj.peerId
    * @params {string} remoteObj.userName
+   * @params {string} remoteObj.type - `small` or `audio`
+   * @params {string} remoteObj.thumbnail - base64 thumbnail image
    * @params {MediaStream} remoteObj.stream
    */
   const addRemotes = useCallback( remoteObj => {
@@ -75,22 +71,22 @@ const RemoteView = props => {
   }, [setRemotes])
 
 
-  useEffect( _ => {
-    const num = _remotes.length
-    const videoTracks = localStream.getVideoTracks()
-
-    if( num > 3 ) {
-      setVoiceOnly(true)
-      onExceeds(true)
-      videoTracks.forEach( track => track.enabled = false)
-    } else {
-      setVoiceOnly(false)
-      onExceeds(false)
-      videoTracks.forEach( track => track.enabled = true)
-    }
-
-  }, [_remotes, localStream, onExceeds])
-
+//  useEffect( _ => {
+//    const num = _remotes.length
+//    const videoTracks = localStream.getVideoTracks()
+//
+//    if( num > 3 ) {
+//      setVoiceOnly(true)
+//      onExceeds(true)
+//      videoTracks.forEach( track => track.enabled = false)
+//    } else {
+//      setVoiceOnly(false)
+//      onExceeds(false)
+//      videoTracks.forEach( track => track.enabled = true)
+//    }
+//
+//  }, [_remotes, localStream, onExceeds])
+//
   useEffect( _ => {
     const db = new Map()
 
@@ -99,14 +95,12 @@ const RemoteView = props => {
         await handler.join( roomId, localStream )
 
         handler.on('peerJoin', peerId => {
-          console.log('someone joined', peerId)
           handler.send({
-            userName, peerId
+            userName, peerId, thumbnail, avatarBgColor
           })
         })
 
         handler.on('peerLeave', peerId => {
-          console.log('someone leaved', peerId)
           db.delete( peerId )
           deleteRemotes(peerId)
         })
@@ -120,6 +114,8 @@ const RemoteView = props => {
             addRemotes({
               peerId: stream.peerId,
               userName: o.userName,
+              thumbnail: o.thumbnail,
+              avatarBgColor: o.avatarBgColor,
               stream
             })
           } else {
@@ -131,26 +127,26 @@ const RemoteView = props => {
           const o = db.get( src )
 
           if( o ) {
-            db.set( src, Object.assign( {}, o, { userName: data.userName }))
+            db.set( src, Object.assign( {}, o, { userName: data.userName, thumbnail: data.thumbnail }))
             addRemotes({
               peerId: src,
-              userName: data.userName,
+              ...data,
               stream: o.stream
             })
           } else {
-            db.set( src, { userName: data.userName })
+            db.set( src, { ...data })
           }
         })
 
         handler.send({
-          userName, peerId: handler.peer.id
+          userName, peerId: handler.peer.id, thumbnail, avatarBgColor
         })
       })
       .catch( err => {
         console.error(err)
         setErrMessage( err.message )
       })
-  }, [ setErrMessage, roomId, userName, localStream, addRemotes, deleteRemotes ])
+  }, [ setErrMessage, roomId, userName, localStream, addRemotes, deleteRemotes, thumbnail, avatarBgColor ])
 
 
   return (
@@ -179,25 +175,18 @@ const RemoteView = props => {
           />
         </div>
       )}
-      { _voiceOnly && (
-        <div>
-          <Alert message={<div>
-            4人を超えると、音声のみになります。
-          </div>} showIcon closable />
-        </div>
-      )}
       <div>
         <Row span={24}>
         { _remotes.filter(o => !!o.stream ).map( (obj, idx) => (
           <Col key={idx} span={24 / Math.ceil(Math.sqrt(_remotes.length))}>
-            <UserView showAudioWave={_voiceOnly} width="100%" userName={obj.userName} stream={obj.stream} />
+            <UserView width="100%" {...obj} type={type} />
           </Col>
         ))}
         </Row>
       </div>
       { process.env.NODE_ENV==="development" && (
       <div style={{position: "absolute", right: 40, top: 0, zIndex: 1002}} >
-        <Button type="primary" onClick={_ => addRemotes( {peerId: "testId", userName, stream: localStream } )}>add</Button>
+        <Button type="primary" onClick={_ => addRemotes( {peerId: "testId", userName, stream: localStream, thumbnail, avatarBgColor } )}>add</Button>
         <Button type="primary" onClick={_ => deleteRemotes( "testId" )}>delete</Button>
       </div>
       )}
@@ -303,11 +292,23 @@ const ShareAlert = props => {
 
 
 export default function(props) {
-  const { localStream, userName } = props
+  const { localStream, type } = props
   const [micEnabled, setMicEnabled] = useState(true)
   const [_voiceOnly, setVoiceOnly] = useState(false)
   const [_showShareAlert, setShowShareAlert] = useState(false)
+  const userName = useSelector(selectUserName)
+    , thumbnail = useSelector(selectThumbnail)
+  const avatarBgColor = useSelector( selectAvatarColor )
 
+  // typeが 'audio' の時は、映像をOFFにする。
+  useEffect( _ => {
+    const tracks = localStream.getVideoTracks()
+    if( type === "audio" ) {
+      tracks.forEach( t => t.enabled = false )
+    }
+  }, [localStream, type])
+
+  // 状態に応じて、マイクを ON/OFFする
   useEffect( _ => {
     const tracks = localStream.getAudioTracks()
     tracks.forEach( t => t.enabled = micEnabled )
@@ -315,8 +316,8 @@ export default function(props) {
 
   return(
     <div className="VideoRoom">
-      <RemoteView {...props} onExceeds={setVoiceOnly} />
-      <LocalView voiceOnly={_voiceOnly} stream={localStream} userName={userName} width={160} />
+      <RemoteView {...props} avatarBgColor={avatarBgColor} userName={userName} type={type} thumbnail={thumbnail} onExceeds={setVoiceOnly} />
+      <LocalView voiceOnly={_voiceOnly} avatarBgColor={avatarBgColor} stream={localStream} userName={userName} width={160} type={type} thumbnail={thumbnail} />
       <MicMuteButton enabled={micEnabled} onClick={setMicEnabled} />
       <ShareButton onClick={_ => setShowShareAlert(true)}/>
       { _showShareAlert && (

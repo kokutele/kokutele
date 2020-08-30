@@ -1,6 +1,11 @@
 import React, {useState, useEffect} from 'react'
+import { useDispatch } from 'react-redux'
 import { Alert, Steps } from 'antd'
+
+import { validateRoomId, validateType, getPlatform } from '../../libs/util'
 import { VideoCameraOutlined, FormOutlined } from '@ant-design/icons'
+
+import { setPlatform } from './room-slice'
 
 
 import Logo from '../common/logo'
@@ -35,10 +40,28 @@ const EnterStep = props => {
 }
 
 export default function Room( props ) {
+  const { roomId, type } = props
   const [state, changeState] = useState("IDLE")
   const [mesg, setMessage] = useState('')
   const [_localStream, setLocalStream ] = useState( null )
-  const [_userName, setUserName ] = useState( '' )
+
+  const dispatch = useDispatch()
+
+  useEffect( () => {
+    const {product, name, version, isMobile} = getPlatform()
+    dispatch( setPlatform({product, name, version, isMobile}))
+  }, [ dispatch ])
+
+  useEffect( _ => {
+    if( !validateRoomId(roomId) ) {
+      setMessage("`roomId` が不正です")
+      changeState("ERROR")
+    }
+    if( !validateType(type) ) {
+      setMessage("`type` が不正です")
+      changeState("ERROR")
+    }
+  }, [roomId, type])
 
   useEffect( _ => {
     if( state === "CONNECTED" && !_localStream ) {
@@ -46,7 +69,6 @@ export default function Room( props ) {
         //.getUserMedia({ video: { width: 720, height: 480}, audio: true })
         .getUserMedia({ video: true, audio: true })
         .then( stream => {
-          console.log( stream )
           setLocalStream( stream )
         })
         .catch( err => setMessage(err.message) )
@@ -58,6 +80,9 @@ export default function Room( props ) {
       <main>
         <div className="tower">
           <div className="container">
+            { state === "ERROR" && (
+              <Alert type="error" showIcon message={mesg} />
+            )}
             <div style={styleRoom}>
               { state === "IDLE" && (
                 <div>
@@ -74,16 +99,18 @@ export default function Room( props ) {
                       <Alert type="error" showIcon message={mesg} />
                     </div>
                   )}
-                  <EnterStep step={1} />
-                  <Enter stream={_localStream} onFinish={e => {
-                    console.log(e)
-                    setUserName(e.username)
-                    changeState('ENTERED')
-                  }} onError={setMessage} />
+                  <EnterStep step={1} type={props.type} />
+                  <Enter 
+                    stream={_localStream} onFinish={e => {
+                      changeState('ENTERED')
+                    }} 
+                    onError={setMessage} 
+                    type={props.type}
+                  />
                 </div>
               )}
               { state === "ENTERED" && (
-                <VideoRoom localStream={_localStream} userName={_userName} roomId={props.roomId} type={props.type} />
+                <VideoRoom localStream={_localStream} roomId={props.roomId} type={props.type} />
               )}
             </div>
           </div>

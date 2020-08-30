@@ -27,7 +27,6 @@ export default class SkywayHandler extends EventEmitter {
     super(props)
     const { debug } = props
 
-    console.log( `apikey: ${apikey}`)
     this.peer = new Peer({key: apikey, debug})
   }
 

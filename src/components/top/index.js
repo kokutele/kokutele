@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import { Button, Divider, Space, Typography } from 'antd'
+import { Button, Card, Divider, Typography, Col, Row } from 'antd'
 import { ArrowRightOutlined } from '@ant-design/icons'
 
 import Logo from '../common/logo'
@@ -16,9 +16,8 @@ const { Title } = Typography
 
 
 export default function() {
-  const handleCreate = useCallback( _ => {
+  const handleCreate = useCallback( (type = 'audio') => {
     const roomId = uuidv4()
-    const type="small"
 
     window.location = `./?r=${roomId}&entered=false&type=${type}`
   }, [])
@@ -28,19 +27,41 @@ export default function() {
         <div className="tower">
           <div className="container">
             <div className="top" style={styleTop}>
-              <Space direction="vertical">
+              <div>
                 <Logo desc="国産で、誰でも無料で使える安心テレカン" />
-                <Button icon={<ArrowRightOutlined />} onClick={handleCreate} type="primary" shape="round" size="large">
-                  create room
-                </Button>
-              </Space>
+                <Divider/>
+
+                <Row gutter={4}>
+                  <Col span={12}>
+                    <Card>
+                      <div>
+                        <Button icon={<ArrowRightOutlined />} onClick={e => handleCreate('small')} type="primary" shape="round" size="large">
+                          small room
+                        </Button>
+                      </div>
+                      2,3人用のお部屋
+                    </Card>
+                  </Col>
+                  <Col span={12}>
+                    <Card>
+                      <div>
+                        <Button icon={<ArrowRightOutlined />} onClick={e => handleCreate('audio')} type="primary" shape="round" size="large">
+                          audio room
+                        </Button>
+                      </div>
+                      7,8人用のお部屋<br/>音声のみ
+                    </Card>
+                  </Col>
+                </Row>
+              </div>
               <Divider />
               <div style={{ textAlign: "left"}}>
                 <Title level={2}>Links</Title>
                 <ul>
-                  <li><a href="https://medium.com/@komasshu" target="_blank" rel="noopener noreferrer">ブログ</a></li>
+                  <li><a href="https://medium.com/kokutele" target="_blank" rel="noopener noreferrer">ブログ</a></li>
                   <li><a href="https://www.facebook.com/groups/307692313780090" target="_blank" rel="noopener noreferrer">Facebookグループ</a></li>
                   <li><a href="https://github.com/kokutele/kokutele" target="_blank" rel="noopener noreferrer">Github - kokutele -</a></li>
+                  <li><a href="/survey" target="_blank" rel="noopener noreferrer">survey</a></li>
                 </ul>
               </div>
               <Divider />
