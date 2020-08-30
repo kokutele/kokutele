@@ -1,7 +1,11 @@
 // insertable-streams/script.js
 // ref - https://webrtc.github.io/samples/src/content/peerconnection/pc1/
 
-const master = { video: [], audio: [] }
+const queue = {
+  audio: new Map(), // <Array>
+  video: new Map(), // <Array>
+}
+
 /**
  * WebRTC handler
  * @class 
@@ -15,7 +19,6 @@ class RTCHandler {
   configuration; // PeerConnectionConfguration object
   offerOptions;  // offer options
   idx;           // index
-  numChunk;
   $views;        // views DOMElement
   $remoteVideo;
   $sendVideoLen;
@@ -39,9 +42,6 @@ class RTCHandler {
     this.$views = props.$views
     this.idx = props.idx
     this.enableTransform = props.enableTransform
-
-    this.numChunk = {video: 0, audio: 0}
-    // mapQueue.set(this.idx, new Array())
 
     // generate received video view
     this._appendRemoteVideoElement()
@@ -147,18 +147,20 @@ class RTCHandler {
       transform: (chunk, controller) => {
         if( this.enableTransform ) {
           if( this.idx === 0 ) {
-            master[kind].push(chunk.data)
+            const size = queue[kind].size
+            if( size > 0 ) {
+              for( let i = 0; i < size; i++ ) {
+                queue[kind].get(i + 1).push( chunk.data )
+              }
+            }
           } else {
-            if( this.numChunk[kind] === 0) {
-              // for debug
-              console.log(chunk)
+            const dataArr = queue[kind].get( this.idx )
+            if( !dataArr ) {
+              queue[kind].set( this.idx, [])
+            } else {
+              const data = dataArr.shift()
+              if( !!data ) chunk.data = data
             }
-
-            chunk.data = master[kind][this.numChunk[kind]]
-            if( this.numChunk[kind] === 0) {
-              console.log(chunk)
-            }
-            this.numChunk[kind]++
           }
         }
 
