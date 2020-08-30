@@ -94,7 +94,7 @@ class RTCHandler {
   _appendRemoteVideoElement() {
     this.$remoteVideo = document.createElement('video')
     this.$remoteVideo.setAttribute('autoPlay', true)
-    this.$remoteVideo.setAttribute('muted', true)
+    this.$remoteVideo.setAttribute('muted', "muted")
     this.$remoteVideo.setAttribute('controls', true)
 
     this.$sendVideoLen = document.createElement('span')
@@ -149,8 +149,8 @@ class RTCHandler {
           if( this.idx === 0 ) {
             const size = queue[kind].size
             if( size > 0 ) {
-              for( let i = 0; i < size; i++ ) {
-                queue[kind].get(i + 1).push( chunk.data )
+              for( let [idx, q] of queue[kind] ) {
+                q.push( chunk.data )
               }
             }
           } else {
@@ -158,8 +158,10 @@ class RTCHandler {
             if( !dataArr ) {
               queue[kind].set( this.idx, [])
             } else {
-              const data = dataArr.shift()
-              if( !!data ) chunk.data = data
+              const d = dataArr.shift()
+              if( !!d ) {
+                chunk.data = d
+              }
             }
           }
         }
@@ -215,8 +217,9 @@ class RTCHandler {
  * 
  */
 const getLocalStream = async ({disabled}) => {
+  const videoConstraints = {width: 720, height:480 }
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: {width: 640, height: 480}, audio: true
+    video: videoConstraints, audio: true
   })
   if( disabled ) {
     stream.getVideoTracks().forEach( t => t.enabled = false)
