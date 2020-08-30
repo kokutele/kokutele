@@ -34,7 +34,7 @@ const run = async () => {
 
     let bgImg
     const _img = new Image(w, h)
-    _img.src = './imgs/Blue_wall_red_sofa.jpg'
+    _img.src = '../imgs/Blue_wall_red_sofa.jpg'
     _img.addEventListener('load', e => {
       ctxSample.drawImage(_img, 0, 0)
       bgImg = ctxSample.getImageData(0, 0, w, h)

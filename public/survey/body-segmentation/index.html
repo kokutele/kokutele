@@ -7,7 +7,6 @@
     <title>kokutele - survey body-segmentation</title>
     <style>
       .capture canvas#result {
-        display: block;
         border: 1px solid #333;
       }
       div.capture img {
@@ -22,20 +21,28 @@
   </head>
   <body>
     <h1>
-      <img src="../logo32.png"/> kokutele -body-segmentation
+      <img src="../../logo32.png"/> kokutele -body-segmentation
     </h1>
     <hr />
-      <a href="./">back to survey list</a>
+      <a href="/survey">back to survey list</a>
     <hr />
     <div class="capture">
       <label>
         Virtual Background: <input id="vb" type="checkbox" checked /><br/>
       </label>
-      <video autoPlay></video><br />
-      <button id="start">start</button><br/>
-      <canvas id="result"></canvas><br />
-      <button id="capture">capture</button><br/>
-      <img />
+      <div>
+        <h2>working space</h2>
+        <button id="start">start</button>
+        <br/>
+        <video autoPlay></video>
+        <canvas id="result"></canvas>
+        <br/>
+        <button id="capture">capture</button><br/>
+      </div>
+      <div>
+        <h2>result space</h2>
+        <img />
+      </div>
     </div>
     <div>
       <h2>references</h2>
@@ -48,5 +55,5 @@
       </ul>
     </div>
   </body>
-  <script src="./body-segmentation.js"></script>
+  <script src="./script.js"></script>
 </html>
