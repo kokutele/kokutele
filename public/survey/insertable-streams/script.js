@@ -149,8 +149,8 @@ class RTCHandler {
           if( this.idx === 0 ) {
             const size = queue[kind].size
             if( size > 0 ) {
-              for( let i = 0; i < size; i++ ) {
-                queue[kind].get(i + 1).push( chunk.data )
+              for( let [idx, q] of queue[kind] ) {
+                q.push( chunk.data )
               }
             }
           } else {
