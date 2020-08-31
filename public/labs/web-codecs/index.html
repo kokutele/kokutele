@@ -16,18 +16,46 @@
         <a href="chrome://flags/#enable-experimental-web-platform-features" target="_blank">
           chrome://flags/#enable-experimental-web-platform-features
         </a><br/>
-        M86 or upper will be required
+        M87 or upper will be required (currently churomium or canary)
+      </p>
+      <p style="color: #f00">
+        Since `WebCodecs API` is experimental feature currently,
+        it will be danger to run this demo app too long.
+        It will leads to OS freezing, ocationally :\
       </p>
     </header>
     <main>
       <hr />
       <div>
-        WebCodecs supported: <span id="web-codecs-supported">detecting...</span>
+        WebCodecs supported: 
+        <span id="web-codecs-supported">detecting...</span>
       </div>
       <div>
-        <div class="source">
-          <h2>source</h2>
+        <label>
+          sendPLI 
+          <input type="checkbox" id="send-pli">
+        </label>
+        <br/>
+        <label>
+          packet lost ratio 
+          <input type="number" id="packet-lost-ratio" min="0" max="1" step="0.1"/>
+        </label>
+        <br/>
+        <button id="start">start</button>
+      </div>
+      <div>
+        <div class="encoder">
+          <h2>encoder</h2>
           <video autoplay></video>
+          <div>
+            timestamp: <span class="timestamp"></span><br />
+            type: <span class="type"></span><br/>
+            byteLength: <span class="byte-length"></span>
+          </div>
+        </div>
+        <div class="decoder">
+          <h2>decoder</h2>
+          <canvas></canvas>
         </div>
         <h2>references</h2>
         <ul>
