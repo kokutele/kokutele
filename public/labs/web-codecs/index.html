@@ -16,7 +16,7 @@
         <a href="chrome://flags/#enable-experimental-web-platform-features" target="_blank">
           chrome://flags/#enable-experimental-web-platform-features
         </a><br/>
-        M86 or upper will be required
+        M87 or upper will be required (currently churomium or canary)
       </p>
     </header>
     <main>
@@ -25,9 +25,21 @@
         WebCodecs supported: <span id="web-codecs-supported">detecting...</span>
       </div>
       <div>
-        <div class="source">
-          <h2>source</h2>
+        <button id="start">start</button>
+      </div>
+      <div>
+        <div class="encoder">
+          <h2>encoder</h2>
           <video autoplay></video>
+          <div>
+            timestamp: <span class="timestamp"></span><br />
+            type: <span class="type"></span><br/>
+            byteLength: <span class="byte-length"></span>
+          </div>
+        </div>
+        <div class="decoder">
+          <h2>decoder</h2>
+          <canvas></canvas>
         </div>
         <h2>references</h2>
         <ul>
