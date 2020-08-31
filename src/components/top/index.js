@@ -61,7 +61,7 @@ export default function() {
                   <li><a href="https://medium.com/kokutele" target="_blank" rel="noopener noreferrer">ブログ</a></li>
                   <li><a href="https://www.facebook.com/groups/307692313780090" target="_blank" rel="noopener noreferrer">Facebookグループ</a></li>
                   <li><a href="https://github.com/kokutele/kokutele" target="_blank" rel="noopener noreferrer">Github - kokutele -</a></li>
-                  <li><a href="/survey" target="_blank" rel="noopener noreferrer">survey</a></li>
+                  <li><a href="/labs" target="_blank" rel="noopener noreferrer">kokutele labs</a></li>
                 </ul>
               </div>
               <Divider />
