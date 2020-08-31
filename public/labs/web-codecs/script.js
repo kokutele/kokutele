@@ -1,12 +1,10 @@
-
 const checkSupported = () => {
-  const isSupported
-  return window.VideoEncoder
+  return !!window.VideoEncoder
 }
 
 //////////////////////////////////////////////////////////////////////////////
 const run = async () => {
-  document.querySelector("#insertable-streams-supported").innerHTML = 
+  document.querySelector("#web-codecs-supported").innerHTML = 
     checkSupported() ? "yes" : "no"
 }
 
