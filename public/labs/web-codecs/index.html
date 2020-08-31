@@ -18,13 +18,29 @@
         </a><br/>
         M87 or upper will be required (currently churomium or canary)
       </p>
+      <p style="color: #f00">
+        Since `WebCodecs API` is experimental feature currently,
+        it will be danger to run this demo app too long.
+        It will leads to OS freezing, ocationally :\
+      </p>
     </header>
     <main>
       <hr />
       <div>
-        WebCodecs supported: <span id="web-codecs-supported">detecting...</span>
+        WebCodecs supported: 
+        <span id="web-codecs-supported">detecting...</span>
       </div>
       <div>
+        <label>
+          sendPLI 
+          <input type="checkbox" id="send-pli">
+        </label>
+        <br/>
+        <label>
+          packet lost ratio 
+          <input type="number" id="packet-lost-ratio" min="0" max="1" step="0.1"/>
+        </label>
+        <br/>
         <button id="start">start</button>
       </div>
       <div>
