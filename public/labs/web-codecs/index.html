@@ -5,6 +5,19 @@
     <link rel="icon" href="../../logo32.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>kokutele labs - WebCodecs</title>
+    <style>
+      .box {
+        display: flex;
+        flex-direction: row;
+      }
+      .viewer {
+        width: 720px;
+        height: 620px;
+        text-align: center;
+        border: 1px solid gray;
+        margin: 3px;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -35,16 +48,27 @@
           sendPLI 
           <input type="checkbox" id="send-pli">
         </label>
+        </label>
         <br/>
         <label>
-          packet lost ratio 
+          ignore sync
+          <input type="checkbox" id="ignore-sync">
+        </label>
+        <br/>
+        <label>
+          emulated delay [msec]
+          <input type="number" id="delay" min="0" max="1000" step="1"/>
+        </label>
+        <br/>
+        <label>
+          emulated packet lost ratio 
           <input type="number" id="packet-lost-ratio" min="0" max="1" step="0.1"/>
         </label>
         <br/>
         <button id="start">start</button>
       </div>
-      <div>
-        <div class="encoder">
+      <div class="box">
+        <div class="encoder viewer">
           <h2>encoder</h2>
           <video autoplay></video>
           <div>
@@ -53,10 +77,12 @@
             byteLength: <span class="byte-length"></span>
           </div>
         </div>
-        <div class="decoder">
+        <div class="decoder viewer">
           <h2>decoder</h2>
           <canvas></canvas>
         </div>
+      </div>
+      <div>
         <h2>references</h2>
         <ul>
           <li>

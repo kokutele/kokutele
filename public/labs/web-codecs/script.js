@@ -4,14 +4,18 @@ const $encoderType = document.querySelector(".encoder .type")
 const $encoderByteLength = document.querySelector(".encoder .byte-length")
 
 const $sendPLI = document.querySelector("#send-pli")
+const $ignoreSync = document.querySelector("#ignore-sync")
+const $delay = document.querySelector("#delay")
 const $packetLostRatio = document.querySelector("#packet-lost-ratio")
 const $start = document.querySelector("#start")
 
 const $decoderCanvas = document.querySelector(".decoder canvas")
 const ctx = $decoderCanvas.getContext('2d')
 
-let packetLostRatio = 0.1
+let packetLostRatio = 0.0
+let delay = 100
 let sendPLI = true
+let ignoreSync = false
 
 const setInputHandler = () => {
   $sendPLI.checked = sendPLI
@@ -21,15 +25,29 @@ const setInputHandler = () => {
     console.log( "sendPLI:", e.target.checked )
   }
 
+  $ignoreSync.checked = ignoreSync
+  $ignoreSync.onclick = e => {
+    ignoreSync = e.target.checked
+    e.target.checked = ignoreSync
+    console.log( "ignoreSync", ignoreSync )
+  }
+
   $packetLostRatio.value = packetLostRatio
   $packetLostRatio.onchange = e => {
-    let value = e.target.value
-    if( value < 0) value = 0
-    if( value > 1) value = 1
+    let value = parseFloat(e.target.value)
 
     packetLostRatio = value
     e.target.value = value
     console.log( "packetLostRatio", packetLostRatio )
+  }
+
+  $delay.value = delay
+  $delay.onchange = e => {
+    let value = e.target.value
+
+    delay = parseFloat(value)
+    e.target.value = value
+    console.log( "delay", delay )
   }
 }
 
@@ -59,23 +77,36 @@ const startEncode = stream => {
     codec: 'vp8'
   })
 
+  /**
+   * This method will be used for sending encoded dato to decoder.
+   * when seqNum
+   * 
+   * @params {number} seqNum - sequence number
+   * @params {chunk} object - chunked encoded data
+   */
   let prev = 0, synched = true
-  const send = (seqNum, chunk) => {
+  const send = async (seqNum, chunk) => {
     if( seqNum != prev + 1 ) {
-      // lost detected
+      // when packet lost is detected
       if(sendPLI) {
         setTimeout( e => {
           reqKeyFrame = true
-        }, 200)
+        }, delay)
       }
 
       synched = false
 
       prev = seqNum
     } else {
-      if( chunk.type === "key" ) synched = true
-      if( synched) videoDecoder.decode(chunk)
       prev = seqNum
+      if( chunk.type === "key" ) synched = true
+
+      await new Promise( r => setTimeout(r, delay))
+      if( ignoreSync ) {
+        videoDecoder.decode(chunk)
+      } else if(synched) {
+        videoDecoder.decode(chunk)
+      }
     }
   }
 
@@ -136,13 +167,18 @@ const run = async () => {
   startEncode(localStream)
 }
 
+const supported = checkSupported()
 document.querySelector("#web-codecs-supported").innerHTML = 
-  checkSupported() ? "yes" : "no"
+  supported ? "yes" : "no"
 setInputHandler()
 $start.onclick = run
 
-alert(
-  ['Notice!: Since `WebCodecs API` is experimental feature currently,',
-   'it will be danger to run this demo app too long.',
-   'It will leads to OS freezing, ocationally :\\'].join(" ")
-)
+if( !supported ) {
+  alert(
+    [
+      "Your browser does not support WebCodecs.",
+      "use Chrome with M87 and enable `#enable-experimental-web-platform-features`",
+      "for experiencing this experimental web app."
+    ].join(" ")
+  )
+}
