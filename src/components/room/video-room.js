@@ -1,11 +1,25 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { selectUserName, selectThumbnail, selectAvatarColor } from './room-slice'
+import { useSelector, useDispatch } from 'react-redux'
+import { 
+  setPeerId,
+  selectPeerId,
+  selectUserName, 
+  selectThumbnail, 
+  selectAvatarColor,
+  addTranscripts,
+  selectTranscripts,
+  setLastLocalTranscript,
+  selectLastLocalTranscript
+} from './room-slice'
 import { Alert, Button, Col, Row } from 'antd'
 import { AudioOutlined, AudioMutedOutlined, CopyOutlined, UsergroupAddOutlined } from '@ant-design/icons'
+import { WebSpeechHandler, checkWebSpeechSupported } from '../../libs/web-speech-handler'
 
 import SkywayHandler from '../../libs/skyway-handler'
 import RTCVideo from '../common/rtc-video'
+import Avatar from 'antd/lib/avatar/avatar'
+
+import { getFormattedTimestamp } from '../../libs/util'
 
 const UserView = props => {
   const { stream, width, type, thumbnail, userName, muted, avatarBgColor } = props
@@ -37,8 +51,12 @@ const UserView = props => {
 
 const LocalView = props => {
   const {voiceOnly} = props
+  const {transcript, isFinal} = useSelector( selectLastLocalTranscript )
   return (
     <div style={{width: props.width, position: "absolute", textAlign: "left", bottom: 0, right: 0}}>
+      <div style={{color: isFinal ? "#fff": "#aaa"}}>
+        {transcript}
+      </div>
       <UserView {...props} muted={true} showAudioWave={voiceOnly}/>
     </div>
   )
@@ -49,6 +67,8 @@ const RemoteView = props => {
   const [_remotes, setRemotes] = useState([])
   const [ _errMessage, setErrMessage ] = useState('')
   const [ _copied, setCopied ] = useState(false)
+
+  const dispatch = useDispatch()
 
   /**
    * @params {Object} remoteObj
@@ -92,6 +112,7 @@ const RemoteView = props => {
 
     SkywayHandler.create()
       .then( async handler => {
+        dispatch( setPeerId( handler.peer.id ))
         await handler.join( roomId, localStream )
 
         handler.on('peerJoin', peerId => {
@@ -146,7 +167,7 @@ const RemoteView = props => {
         console.error(err)
         setErrMessage( err.message )
       })
-  }, [ setErrMessage, roomId, userName, localStream, addRemotes, deleteRemotes, thumbnail, avatarBgColor ])
+  }, [ setErrMessage, roomId, userName, localStream, addRemotes, deleteRemotes, thumbnail, avatarBgColor, dispatch ])
 
 
   return (
@@ -254,6 +275,50 @@ const ShareButton = props => {
   )
 }
 
+
+
+const TranscriptsView = () => {
+  const transcripts = useSelector( selectTranscripts )
+
+  return(
+    <div className="TranscriptView" style={{
+      position: "absolute",
+      top: 150,
+      bottom: 400,
+      color: "#fff",
+      textAlign: "left"
+    }}>
+      <div>
+        transcript view
+        <ul>
+          { transcripts.map( t => {
+            const temp = t.userName.split(" ")
+            const displayName = temp.length > 1 ? temp.map( s => s.slice(0,1) ).join("") : temp[0].slice(0,2)
+            const time = getFormattedTimestamp( t.timestamp )
+            return (
+            <li>
+              { t.thumbnail ? (
+                <img height={48} src={t.thumbnail} alt="thumbnail"/>
+              ): (
+                <Avatar
+                  size={32}
+                  style={{
+                    backgroundColor: t.avatarBgColor,
+                    verticalAlign: 'middle',
+                  }}
+                >{displayName}</Avatar>
+              )}
+              <span>{time}</span>
+              <br />
+              {t.transcript}
+            </li>
+          )})}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 const ShareAlert = props => {
   const { onClose } = props
   const [ _copied, setCopied ] = useState(false)
@@ -296,9 +361,13 @@ export default function(props) {
   const [micEnabled, setMicEnabled] = useState(true)
   const [_voiceOnly, setVoiceOnly] = useState(false)
   const [_showShareAlert, setShowShareAlert] = useState(false)
-  const userName = useSelector(selectUserName)
+
+  const peerId = useSelector(selectPeerId)
+    , userName = useSelector(selectUserName)
     , thumbnail = useSelector(selectThumbnail)
-  const avatarBgColor = useSelector( selectAvatarColor )
+    , avatarBgColor = useSelector( selectAvatarColor )
+
+  const dispatch = useDispatch()
 
   // typeが 'audio' の時は、映像をOFFにする。
   useEffect( _ => {
@@ -314,10 +383,50 @@ export default function(props) {
     tracks.forEach( t => t.enabled = micEnabled )
   }, [micEnabled, localStream])
 
+  // WebSpeech
+  useEffect( _ => {
+    if( !peerId ) return
+
+    console.log( peerId )
+    const isWebSpeechSupported = checkWebSpeechSupported()
+    const onResult = result => {
+      const { transcript, isFinal, timestamp } = result
+      dispatch(setLastLocalTranscript({
+        transcript, isFinal
+      }))
+
+      console.log( isFinal )
+      if( isFinal ) {
+        dispatch(addTranscripts({
+          timestamp,
+          transcript,
+          peerId,
+          userName,
+          thumbnail,
+          avatarBgColor
+        }))
+      }
+      
+    }
+    const onError = err => {
+      console.warn(err)
+    }
+
+    if( isWebSpeechSupported ) {
+      const handler = WebSpeechHandler.create({onResult, onError})
+      handler.start()
+    }
+
+    return function cleanup() {
+      // todo - clear WebSpeech handler
+    }
+  }, [peerId, avatarBgColor, dispatch, thumbnail, userName])
+
   return(
     <div className="VideoRoom">
       <RemoteView {...props} avatarBgColor={avatarBgColor} userName={userName} type={type} thumbnail={thumbnail} onExceeds={setVoiceOnly} />
       <LocalView voiceOnly={_voiceOnly} avatarBgColor={avatarBgColor} stream={localStream} userName={userName} width={160} type={type} thumbnail={thumbnail} />
+      <TranscriptsView />
       <MicMuteButton enabled={micEnabled} onClick={setMicEnabled} />
       <ShareButton onClick={_ => setShowShareAlert(true)}/>
       { _showShareAlert && (

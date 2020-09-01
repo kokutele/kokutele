@@ -53,7 +53,7 @@ class MyRecognition {
 
   _getFormattedTimestamp() {
     const date = new Date(this.startTimestamp)
-    const hour = ('00' + date.getHours()).slice(-2)
+    const hour    = ('00' + date.getHours()  ).slice(-2)
     const minutes = ('00' + date.getMinutes()).slice(-2)
     const seconds = ('00' + date.getSeconds()).slice(-2)
    
