@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Form, Avatar, Input, Button, Radio, Switch, Modal } from 'antd' 
-import { ImportOutlined, CameraOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
+import { ImportOutlined, CameraOutlined, PictureOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
 
 import RTCVideo from '../common/rtc-video'
 import ThumbnailEditor from '../common/thumbnail-editor'
@@ -129,7 +129,7 @@ export default function(props) {
           onClick={ _ => setVisibleBgSelector(true)}
           type="default"
           shape="round"
-          icon={<CameraOutlined />}
+          icon={<PictureOutlined />}
           danger
         >set virtual Background</Button>
       </div>

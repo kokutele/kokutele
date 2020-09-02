@@ -4,6 +4,10 @@ import {
   Row, Col, Card
 } from 'antd'
 
+import {
+  PictureOutlined
+} from '@ant-design/icons'
+
 // images - https://vbackground.com/category/room/
 import bg0 from '../../imgs/bgImages/Blue_wall_red_sofa.jpg'
 import bg1 from '../../imgs/bgImages/counter_kitchen.jpg'
@@ -30,7 +34,7 @@ export default function(props:PropTypes) {
 
   return (
     <div className="BackgroundSelector">
-      <h3>背景を選択して下さい</h3>
+      <h3><PictureOutlined/> 背景を選択して下さい</h3>
       <Row gutter={8}>
         {images.map( (img, idx) => {
           const border = idx === selected ? "3px solid yellow" : ""
