@@ -27,6 +27,11 @@ export function getFormattedTimestamp(timestamp:number):string {
   return `${hour}:${minutes}:${seconds}`
 }
 
+export function shortenText(text:string, len:number):string {
+  const ret = text.length <= len ? text : `...${text.slice(-1*len)}`
+
+  return ret
+}
 
 
 export function validateRoomId( roomId:string ):boolean {

@@ -11,7 +11,7 @@ import {
   setLastLocalTranscript,
   selectLastLocalTranscript
 } from './room-slice'
-import { Alert, Button, Col, Row } from 'antd'
+import { Alert, Button, Col, Row, List } from 'antd'
 import { AudioOutlined, AudioMutedOutlined, CopyOutlined, UsergroupAddOutlined } from '@ant-design/icons'
 import { WebSpeechHandler, checkWebSpeechSupported } from '../../libs/web-speech-handler'
 
@@ -19,7 +19,9 @@ import SkywayHandler from '../../libs/skyway-handler'
 import RTCVideo from '../common/rtc-video'
 import Avatar from 'antd/lib/avatar/avatar'
 
-import { getFormattedTimestamp } from '../../libs/util'
+import { getSkywayHandler, setSkywayHandler } from './skyway-handler-manager'
+
+import { getFormattedTimestamp, shortenText } from '../../libs/util'
 
 const UserView = props => {
   const { stream, width, type, thumbnail, userName, muted, avatarBgColor } = props
@@ -52,12 +54,13 @@ const UserView = props => {
 const LocalView = props => {
   const {voiceOnly} = props
   const {transcript, isFinal} = useSelector( selectLastLocalTranscript )
+  // todo - move to bottom, automaticallly
   return (
     <div style={{width: props.width, position: "absolute", textAlign: "left", bottom: 0, right: 0}}>
-      <div style={{color: isFinal ? "#fff": "#aaa"}}>
-        {transcript}
-      </div>
       <UserView {...props} muted={true} showAudioWave={voiceOnly}/>
+      <div style={{color: isFinal ? "#fff": "#aaa", height: "4em", overflowY: "auto"}}>
+        {shortenText(transcript, 16)}
+      </div>
     </div>
   )
 }
@@ -112,12 +115,18 @@ const RemoteView = props => {
 
     SkywayHandler.create()
       .then( async handler => {
+        setSkywayHandler( handler )
+
         dispatch( setPeerId( handler.peer.id ))
         await handler.join( roomId, localStream )
 
         handler.on('peerJoin', peerId => {
+
           handler.send({
-            userName, peerId, thumbnail, avatarBgColor
+            type: 'meta',
+            payload: {
+              userName, peerId, thumbnail, avatarBgColor
+            }
           })
         })
 
@@ -144,23 +153,60 @@ const RemoteView = props => {
           }
         })
 
+        /**
+         * 
+         * 他の参加者からメッセージがきた時のハンドラー
+         * 参加時のメタデータ通知や、音声認識時の結果通知など
+         * 
+         * @params {sring} src - peerId of remote peer
+         * @params {object} data
+         * @params {string} data.type - 'meta', 'recognition'
+         * @params {object} data.payload - structure is depeends on each type
+         * 
+         * payload structure
+         * 
+         * case type === 'meta'
+         * @params {string} userName
+         * @params {string} peerId
+         * @params {string} thumbnail - base64 encoded
+         * @params {string} avatarBgColor
+         * 
+         * case type === 'recognition'
+         * @params {number} timestamp,
+         * @params {string} transcript,
+         * @params {string} peerId,
+         * @params {string} userName,
+         * @params {string} thumbnail,
+         * @params {string} avatarBgColor
+         *
+         */
         handler.on('data', ({src, data}) => {
-          const o = db.get( src )
+          const { type, payload } = data
+          console.log( data )
 
-          if( o ) {
-            db.set( src, Object.assign( {}, o, { userName: data.userName, thumbnail: data.thumbnail }))
-            addRemotes({
-              peerId: src,
-              ...data,
-              stream: o.stream
-            })
-          } else {
-            db.set( src, { ...data })
+          if( type === 'meta') {
+            const o = db.get( src )
+
+            if( o ) {
+              db.set( src, Object.assign( {}, o, { userName: payload.userName, thumbnail: payload.thumbnail }))
+              addRemotes({
+                peerId: src, ...payload, stream: o.stream
+              })
+            } else {
+              db.set( src, { ...payload })
+            }
+          }
+
+          if( type === 'recognition' ) {
+            dispatch(addTranscripts( payload ))
           }
         })
 
         handler.send({
-          userName, peerId: handler.peer.id, thumbnail, avatarBgColor
+          type: 'meta',
+          payload: {
+            userName, peerId: handler.peer.id, thumbnail, avatarBgColor
+          }
         })
       })
       .catch( err => {
@@ -279,42 +325,54 @@ const ShareButton = props => {
 
 const TranscriptsView = () => {
   const transcripts = useSelector( selectTranscripts )
+  const reversed = transcripts.map( t => {
+    const temp = t.userName.split(" ")
+    const displayName = temp.length > 1 ? temp.map( s => s.slice(0,1) ).join("") : temp[0].slice(0,2)
+    const time = getFormattedTimestamp( t.timestamp )
+    return Object.assign({}, t, {displayName, time})
+  }).reduce((a, b) => [b, ...a], [])
 
   return(
     <div className="TranscriptView" style={{
       position: "absolute",
-      top: 150,
-      bottom: 400,
+      top: 250,
+      bottom: 180,
+      right: 0,
       color: "#fff",
-      textAlign: "left"
+      textAlign: "left",
+      width: 240,
+      overflowY: "auto",
+      background: "rgba(0, 0, 0, 0.5)"
     }}>
-      <div>
-        transcript view
-        <ul>
-          { transcripts.map( t => {
-            const temp = t.userName.split(" ")
-            const displayName = temp.length > 1 ? temp.map( s => s.slice(0,1) ).join("") : temp[0].slice(0,2)
-            const time = getFormattedTimestamp( t.timestamp )
-            return (
-            <li>
-              { t.thumbnail ? (
-                <img height={48} src={t.thumbnail} alt="thumbnail"/>
-              ): (
-                <Avatar
-                  size={32}
+      { reversed.length > 0 && (
+      <List
+        itemLayout="horizontal"
+        dataSource={reversed}
+        renderItem={item => {
+
+          return (
+          <List.Item>
+            <List.Item.Meta
+              avatar={ item.thumbnail ? (
+                <Avatar src={item.thumbnail} />
+              ):(
+                <Avatar src={item.thumbnail}
                   style={{
-                    backgroundColor: t.avatarBgColor,
+                    backgroundColor: item.avatarBgColor,
                     verticalAlign: 'middle',
                   }}
-                >{displayName}</Avatar>
+                >
+                  {item.displayName}
+                </Avatar>
               )}
-              <span>{time}</span>
-              <br />
-              {t.transcript}
-            </li>
-          )})}
-        </ul>
-      </div>
+              title={<span style={{color: "#fff"}}>{item.transcript}</span>}
+              description={<span style={{color: "#aaa"}}>{item.time}</span>}
+            />
+          </List.Item>
+          )
+        }}
+      />
+      )}
     </div>
   )
 }
@@ -387,38 +445,51 @@ export default function(props) {
   useEffect( _ => {
     if( !peerId ) return
 
-    console.log( peerId )
+    // we assumed that skywayHandler will be always exists
+    // when peerId is not null
+    const skywayHandler = getSkywayHandler()
+
     const isWebSpeechSupported = checkWebSpeechSupported()
+
+    // 音声認識結果が帰ってきた時のコールバック
+    // isFinal の時(認識が完了した時)に、`addTranscripts()`が
+    // 呼ばれ、<TranscriptsView/>に表示されるようになる
     const onResult = result => {
       const { transcript, isFinal, timestamp } = result
       dispatch(setLastLocalTranscript({
         transcript, isFinal
       }))
 
-      console.log( isFinal )
       if( isFinal ) {
-        dispatch(addTranscripts({
+        const payload = {
           timestamp,
           transcript,
           peerId,
           userName,
           thumbnail,
           avatarBgColor
-        }))
+        }
+        dispatch(addTranscripts(payload))
+        skywayHandler.send({
+          type: 'recognition',
+          payload
+        })
+       
       }
-      
     }
+
     const onError = err => {
       console.warn(err)
     }
 
+    let handler
     if( isWebSpeechSupported ) {
-      const handler = WebSpeechHandler.create({onResult, onError})
+      handler = WebSpeechHandler.create({onResult, onError})
       handler.start()
     }
 
     return function cleanup() {
-      // todo - clear WebSpeech handler
+      if(handler) handler.destroy()
     }
   }, [peerId, avatarBgColor, dispatch, thumbnail, userName])
 

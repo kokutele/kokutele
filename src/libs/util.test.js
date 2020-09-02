@@ -1,8 +1,9 @@
 import {
+  isMobile,
+  shortenText,
   types,
   validateRoomId,
   validateType,
-  isMobile,
 } from './util'
 
 describe('types', () => {
@@ -11,6 +12,18 @@ describe('types', () => {
     expect(types.includes('audio')).toBe(true)
     expect(types.includes('large')).toBe(true)
     expect(types.includes('fuga')).toBe(false)
+  })
+})
+
+describe('shortenText', () => {
+  const len = 8
+  test('len以下であればそのまま', () => {
+    expect(shortenText('hello', 8)).toBe('hello')
+    expect(shortenText('こんにちは', 8)).toBe('こんにちは')
+  })
+  test('len以上であればshorten', () => {
+    expect(shortenText('hellohello', 8)).toBe('...llohello')
+    expect(shortenText('こんにちはこんにちは', 8)).toBe('...にちはこんにちは')
   })
 })
 

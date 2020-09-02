@@ -22,24 +22,32 @@ export class WebSpeechHandler {
 
   recognition: Object;
   speechGrammarList: Object;
-  startTimestamp: number;
   onResult: Function;
   onError: Function;
+  idx: number;
+  destroyed: boolean;
 
   constructor(props:PropTypes) {
     this.recognition = new SpeechRecognition();
     this.speechGrammarList = new SpeechGrammarList();
 
+    // todo - add grammer from userName
+    // grammer MUST be JSFG
+    // for more detail, see - https://developer.mozilla.org/ja/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
+    //
+    // const grammer = '<some jsfg format text>'
+    // this.speechGrammarList.addFromString(grammar, 1);
+
     this.recognition.grammars = this.speechGrammarList
-    this.recognition.continuous = false
+    this.recognition.continuous = true
     this.recognition.lang = 'ja'
     this.recognition.interimResults = true
     this.recognition.maxAlternatives = 1
+    this.idx = 0
+    this.destroyed = false
 
     this.onResult = props.onResult
     this.onError  = props.onError
-
-    this.startTimestamp = 0
   }
 
   start():void {
@@ -47,29 +55,42 @@ export class WebSpeechHandler {
     this._setSpeechHandler()
   }
 
+  destroy():void {
+    this.destroyed = true
+    this.recognition.stop()
+  }
+
   _setSpeechHandler() {
     this.recognition.onstart = () => {
+      console.log("start")
     }
     this.recognition.onspeechstart = () => {
-      this.startTimestamp = Date.now()
     }
     this.recognition.onresult = e => {
-      const result = e.results[0]
+      const result = e.results[this.idx]
+
       this.onResult( {
-        timestamp: this.startTimestamp,
+        timestamp: Date.now(),
         transcript: result[0].transcript,
         isFinal: result.isFinal
       } )
+      if(result.isFinal) {
+        this.idx++
+      }
     }
     this.recognition.onend = () => {
-      this.recognition.start()
+      console.log("end")
+      if( !this.destroyed ) {
+        this.idx = 0
+        this.recognition.start()
+      }
     }
     this.recognition.onspeechend = () => {
       this.recognition.stop()
     }
     this.recognition.ononmatch = () => {
       this.onResult({
-        timestamp: this.startTimestamp,
+        timestamp: Date.now(),
         transcript: '認識できませんでした',
         isFinal: false
       })
