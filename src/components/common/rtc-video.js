@@ -14,11 +14,11 @@ export default function(props) {
   const _canvas = useRef()
   const _requestId = useRef()
   let _finished = false
-  const { stream, width, type, muted, thumbnail, avatarBgColor } = props
+  const { stream, width, type, muted, thumbnail, avatarBgColor, bgImage } = props
   const userName = !!props.userName ? props.userName : "名無しさん"
 
   useEffect( _ => {
-    if( _canvas && _wrapper && stream ) {
+    if( _canvas.current && _wrapper.current && stream ) {
       const ctx = _canvas.current.getContext('2d')
         , w = _wrapper.current.offsetWidth
         , h = _wrapper.current.offsetHeight
@@ -78,7 +78,7 @@ export default function(props) {
     return function clean() {
       window.cancelAnimationFrame(_requestId.current)
     }
-  }, [stream, _canvas, _wrapper, _finished, userName])
+  }, [stream, _canvas, bgImage, _wrapper, _finished, userName])
 
   useEffect( _ => {
     if( stream ) {
@@ -97,6 +97,11 @@ export default function(props) {
   return (
     <div className="RTCVideo">
       <div className="video-ratio-wrapper" ref={e => _wrapper.current = e} style={{ width }}>
+        { bgImage && (
+          <div>
+            <img src={bgImage} alt="background" />
+          </div>
+        )}
         <canvas ref={e => _canvas.current = e} width="100%" height="100%"></canvas>
         { type!=="audio" ? (
           <video ref={e => _video.current = e} muted={!!muted} autoPlay playsInline />

@@ -9,7 +9,8 @@ import {
   addTranscripts,
   selectTranscripts,
   setLastLocalTranscript,
-  selectLastLocalTranscript
+  selectLastLocalTranscript,
+  selectBgImage
 } from './room-slice'
 import { Alert, Button, Col, Row, List } from 'antd'
 import { AudioOutlined, AudioMutedOutlined, CopyOutlined, UsergroupAddOutlined } from '@ant-design/icons'
@@ -24,20 +25,11 @@ import { getSkywayHandler, setSkywayHandler } from './skyway-handler-manager'
 import { getFormattedTimestamp, shortenText } from '../../libs/util'
 
 const UserView = props => {
-  const { stream, width, type, thumbnail, userName, muted, avatarBgColor } = props
-
-  // todo - change type according to type
   return (
     <div style={{position: "relative"}}>
       <RTCVideo 
-        stream={stream} 
-        width={width} 
         style={{position: "absolute", zIndex: 1000}}
-        muted={muted}
-        userName={userName}
-        type={type}
-        thumbnail={thumbnail}
-        avatarBgColor={avatarBgColor}
+        {...props}
       />
     </div>
   )
@@ -66,7 +58,7 @@ const LocalView = props => {
 }
 
 const RemoteView = props => {
-  const { roomId, userName, localStream, type, avatarBgColor, thumbnail } = props
+  const { roomId, userName, localStream, type, avatarBgColor, thumbnail, bgImage } = props
   const [_remotes, setRemotes] = useState([])
   const [ _errMessage, setErrMessage ] = useState('')
   const [ _copied, setCopied ] = useState(false)
@@ -121,11 +113,10 @@ const RemoteView = props => {
         await handler.join( roomId, localStream )
 
         handler.on('peerJoin', peerId => {
-
           handler.send({
             type: 'meta',
             payload: {
-              userName, peerId, thumbnail, avatarBgColor
+              userName, peerId, thumbnail, avatarBgColor, bgImage
             }
           })
         })
@@ -146,6 +137,7 @@ const RemoteView = props => {
               userName: o.userName,
               thumbnail: o.thumbnail,
               avatarBgColor: o.avatarBgColor,
+              bgImage: o.bgImage,
               stream
             })
           } else {
@@ -188,7 +180,7 @@ const RemoteView = props => {
             const o = db.get( src )
 
             if( o ) {
-              db.set( src, Object.assign( {}, o, { userName: payload.userName, thumbnail: payload.thumbnail }))
+              db.set( src, Object.assign( {}, o, { userName: payload.userName, thumbnail: payload.thumbnail, bgImage: payload.bgImage }))
               addRemotes({
                 peerId: src, ...payload, stream: o.stream
               })
@@ -205,7 +197,7 @@ const RemoteView = props => {
         handler.send({
           type: 'meta',
           payload: {
-            userName, peerId: handler.peer.id, thumbnail, avatarBgColor
+            userName, peerId: handler.peer.id, thumbnail, avatarBgColor, bgImage
           }
         })
       })
@@ -213,7 +205,7 @@ const RemoteView = props => {
         console.error(err)
         setErrMessage( err.message )
       })
-  }, [ setErrMessage, roomId, userName, localStream, addRemotes, deleteRemotes, thumbnail, avatarBgColor, dispatch ])
+  }, [ setErrMessage, roomId, userName, localStream, addRemotes, deleteRemotes, thumbnail, avatarBgColor, bgImage, dispatch ])
 
 
   return (
@@ -253,7 +245,7 @@ const RemoteView = props => {
       </div>
       { process.env.NODE_ENV==="development" && (
       <div style={{position: "absolute", right: 40, top: 0, zIndex: 1002}} >
-        <Button type="primary" onClick={_ => addRemotes( {peerId: "testId", userName, stream: localStream, thumbnail, avatarBgColor } )}>add</Button>
+        <Button type="primary" onClick={_ => addRemotes( {peerId: "testId", userName, stream: localStream, thumbnail, avatarBgColor, bgImage } )}>add</Button>
         <Button type="primary" onClick={_ => deleteRemotes( "testId" )}>delete</Button>
       </div>
       )}
@@ -342,7 +334,7 @@ const TranscriptsView = () => {
       textAlign: "left",
       width: 240,
       overflowY: "auto",
-      background: "rgba(0, 0, 0, 0.5)"
+      background: "rgba(0, 0, 0, 0.75)"
     }}>
       { reversed.length > 0 && (
       <List
@@ -424,6 +416,7 @@ export default function(props) {
     , userName = useSelector(selectUserName)
     , thumbnail = useSelector(selectThumbnail)
     , avatarBgColor = useSelector( selectAvatarColor )
+    , bgImage = useSelector( selectBgImage )
 
   const dispatch = useDispatch()
 
@@ -483,7 +476,8 @@ export default function(props) {
     }
 
     let handler
-    if( isWebSpeechSupported ) {
+    const useSpeechRec = isWebSpeechSupported
+    if( useSpeechRec ) {
       handler = WebSpeechHandler.create({onResult, onError})
       handler.start()
     }
@@ -495,8 +489,25 @@ export default function(props) {
 
   return(
     <div className="VideoRoom">
-      <RemoteView {...props} avatarBgColor={avatarBgColor} userName={userName} type={type} thumbnail={thumbnail} onExceeds={setVoiceOnly} />
-      <LocalView voiceOnly={_voiceOnly} avatarBgColor={avatarBgColor} stream={localStream} userName={userName} width={160} type={type} thumbnail={thumbnail} />
+      <RemoteView 
+        {...props} 
+        avatarBgColor={avatarBgColor} 
+        userName={userName} 
+        type={type} 
+        thumbnail={thumbnail} 
+        onExceeds={setVoiceOnly} 
+        bgImage={bgImage}
+      />
+      <LocalView 
+        voiceOnly={_voiceOnly} 
+        avatarBgColor={avatarBgColor} 
+        stream={localStream} 
+        userName={userName} 
+        width={160} 
+        type={type} 
+        thumbnail={thumbnail} 
+        bgImage={bgImage}
+      />
       <TranscriptsView />
       <MicMuteButton enabled={micEnabled} onClick={setMicEnabled} />
       <ShareButton onClick={_ => setShowShareAlert(true)}/>

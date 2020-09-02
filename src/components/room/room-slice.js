@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+
 // トーンとしてはダルトーンを採用
 // ref - https://iro-color.com/colorchart/tone/dull-tone.html
 export const avatarColors = {
@@ -15,6 +16,7 @@ export const roomSlice = createSlice({
     peerId: '',
     userName: '名無しさん',
     thumbnail: '',
+    bgImage: '',
     avatarColorName: 'purple',
     platform: {
       product: '',
@@ -34,6 +36,9 @@ export const roomSlice = createSlice({
     },
     setThumbnail: (state, action) => {
       state.thumbnail = action.payload
+    },
+    setBgImage: (state, action) => {
+      state.bgImage = action.payload
     },
     setAvatarColorName: (state, action) => {
       state.avatarColorName = action.payload
@@ -62,6 +67,7 @@ export const {
   setPeerId,
   setUserName,
   setThumbnail,
+  setBgImage,
   setAvatarColorName,
   setPlatform,
   addTranscripts,
@@ -72,6 +78,7 @@ export const {
 export const selectPeerId = state => state.room.peerId
 export const selectUserName = state => state.room.userName
 export const selectThumbnail = state => state.room.thumbnail;
+export const selectBgImage = state => state.room.bgImage;
 export const selectAvatarColorName = state => state.room.avatarColorName;
 export const selectAvatarColor = state => {
   const name = state.room.avatarColorName
