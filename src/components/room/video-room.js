@@ -35,14 +35,6 @@ const UserView = props => {
   )
 }
 
-// const DisplayType = props => {
-//   return (
-//     <div style={{position: "absolute", top: 0, left: 0}}>
-//       room type: {props.type}
-//     </div>
-//   )
-// }
-
 const LocalView = props => {
   const {voiceOnly} = props
   const {transcript, isFinal} = useSelector( selectLastLocalTranscript )
@@ -85,23 +77,6 @@ const RemoteView = props => {
     })
   }, [setRemotes])
 
-
-//  useEffect( _ => {
-//    const num = _remotes.length
-//    const videoTracks = localStream.getVideoTracks()
-//
-//    if( num > 3 ) {
-//      setVoiceOnly(true)
-//      onExceeds(true)
-//      videoTracks.forEach( track => track.enabled = false)
-//    } else {
-//      setVoiceOnly(false)
-//      onExceeds(false)
-//      videoTracks.forEach( track => track.enabled = true)
-//    }
-//
-//  }, [_remotes, localStream, onExceeds])
-//
   useEffect( _ => {
     const db = new Map()
 
@@ -317,6 +292,7 @@ const ShareButton = props => {
 
 const TranscriptsView = () => {
   const transcripts = useSelector( selectTranscripts )
+  const [ _copied, setCopied ] = useState(false)
   const reversed = transcripts.map( t => {
     const temp = t.userName.split(" ")
     const displayName = temp.length > 1 ? temp.map( s => s.slice(0,1) ).join("") : temp[0].slice(0,2)
@@ -336,6 +312,33 @@ const TranscriptsView = () => {
       overflowY: "auto",
       background: "rgba(0, 0, 0, 0.75)"
     }}>
+      <div style={{textAlign: "right", paddintRight: "3px"}}>
+        { _copied && (<span style={{color: "#fff", fontWeight:"bold", fontSize: "0.75em"}}>copied!</span>)}
+        <Button type="link" onClick={_ => {
+            const listener = function(e){
+              const result = JSON.stringify(
+                transcripts.map( t => (
+                  {
+                    timestamp: t.timestamp,
+                    formatted: getFormattedTimestamp(t.timestamp),
+                    userName: t.userName,
+                    transcript: t.transcript
+                  }
+                )),
+                null, 2
+              )
+              e.clipboardData.setData("text/plain" , result);    
+              setCopied(true)
+              e.preventDefault();
+              document.removeEventListener("copy", listener);
+              setTimeout( _ => setCopied(false), 3000)
+            }
+            document.addEventListener("copy" , listener);
+            document.execCommand("copy")
+        }}>
+          <CopyOutlined/>
+        </Button>
+      </div>
       { reversed.length > 0 && (
       <List
         itemLayout="horizontal"
@@ -418,6 +421,7 @@ export default function(props) {
     , avatarBgColor = useSelector( selectAvatarColor )
     , bgImage = useSelector( selectBgImage )
 
+  const transcripts = useSelector( selectTranscripts )
   const dispatch = useDispatch()
 
   // typeが 'audio' の時は、映像をOFFにする。
@@ -508,7 +512,9 @@ export default function(props) {
         thumbnail={thumbnail} 
         bgImage={bgImage}
       />
-      <TranscriptsView />
+      {transcripts.length > 0 && (
+        <TranscriptsView />
+      )}
       <MicMuteButton enabled={micEnabled} onClick={setMicEnabled} />
       <ShareButton onClick={_ => setShowShareAlert(true)}/>
       { _showShareAlert && (
