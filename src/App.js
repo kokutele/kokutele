@@ -1,4 +1,4 @@
-
+//@flow
 
 import React from 'react';
 import queryString from 'query-string'
@@ -9,8 +9,14 @@ import Room from './components/room'
 
 import './App.css';
 
+type queryTypes = {
+  r: string;
+  entered: string;
+  type: string;
+}
+
 function App() {
-  const {r, entered, type} = queryString.parse( window.location.search )
+  const {r, entered, type}:queryTypes = queryString.parse( window.location.search )
 
   return (
     <div className="App">
