@@ -76,7 +76,7 @@ export default function(props) {
         userName={userName} 
         bgImage={bgImage}
       />
-      { (type==="audio") && (
+      { (type==="audio" && visible) && (
       <div>
         <Modal
           visible={visible}
