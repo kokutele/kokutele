@@ -18,7 +18,7 @@ const { Title } = Typography
 export default function() {
   const handleCreate = useCallback( (type = 'audio') => {
     const roomId = uuidv4()
-
+    
     window.location = `./?r=${roomId}&entered=false&type=${type}`
   }, [])
   return (
@@ -28,7 +28,7 @@ export default function() {
           <div className="container">
             <div className="top" style={styleTop}>
               <div>
-                <Logo desc="国産で、誰でも無料で使える安心テレカン" />
+                <Logo desc="国産で、誰でも無料で使える安心 Web会議" />
                 <Divider/>
 
                 <Row gutter={4}>
@@ -66,7 +66,7 @@ export default function() {
               </div>
               <Divider />
               <div>
-                &copy; 2020 Kokutele OSS Community.
+                &copy; 2020 Kokutele OSS Project.
               </div>
             </div>
           </div>

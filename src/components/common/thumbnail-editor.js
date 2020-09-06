@@ -51,6 +51,14 @@ export default function(props:PropTypes):Object {
 
       _renderer.current.start()
     }
+    
+    return function clenaup() {
+      if( _renderer.current && _renderer.current.stop) {
+        _renderer.current.stop()
+        _renderer.current = null
+        console.log('cleanup')
+      }
+    }
   }, [_canvas, _video, _canvasBack, useBustUp])
 
   useEffect( _ => {
@@ -65,11 +73,6 @@ export default function(props:PropTypes):Object {
       const _thumbnail:string = cvs.toDataURL('image/png')
       if( _setThumbnail ) _setThumbnail(_thumbnail )
       if( setThumbnail  ) setThumbnail(_thumbnail )
-
-      if( _renderer.current && typeof _renderer.current.stop === 'function' ) {
-        _renderer.current.stop()
-        _renderer.current = null
-      }
     } 
   }, [_canvas, _setThumbnail, setThumbnail])
 

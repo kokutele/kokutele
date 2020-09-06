@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Form, Avatar, Input, Button, Radio, Switch, Modal } from 'antd' 
-import { ImportOutlined, CameraOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
+import { ImportOutlined, CameraOutlined, PictureOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons'
 
 import RTCVideo from '../common/rtc-video'
 import ThumbnailEditor from '../common/thumbnail-editor'
+import BackgroundSelector from '../common/background-selector'
 import { 
   setUserName, 
   setThumbnail, 
@@ -14,7 +15,10 @@ import {
   selectAvatarColor, 
   selectAvatarColorName,
   selectIsMobile,
+  selectBgImage,
+  setBgImage,
 } from './room-slice'
+
 
 const layout = {
   labelCol: {
@@ -34,11 +38,13 @@ const tailLayout = {
 
 export default function(props) {
   const { stream, type, onFinish, onError } = props
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(false)  // for thumbnail editor
+  const [visibleBgSelector, setVisibleBgSelector] = useState(false)  // for thumbnail editor
   const [thumbnail, _setThumbnail] = useState('')
   const [userName, _setUserName] = useState( useSelector(selectUserName))
   const [_useBustUp, setUseBustUp] = useState(true)
   const [disableSwitch, setDisableSwitch] = useState( false )
+  const bgImage = useSelector( selectBgImage )
 
   const isMobile = useSelector( selectIsMobile )
 
@@ -60,7 +66,16 @@ export default function(props) {
 
   return (
     <div className="Enter" style={{ textAlign: "center", maxWidth: 512, margin: "8px auto" }}>
-      <RTCVideo type={type} thumbnail={thumbnail} avatarBgColor={avatarBgColor} stream={stream} muted={true} width="100%" userName={userName} />
+      <RTCVideo 
+        type={type} 
+        thumbnail={thumbnail} 
+        avatarBgColor={avatarBgColor} 
+        stream={stream} 
+        muted={true} 
+        width="100%" 
+        userName={userName} 
+        bgImage={bgImage}
+      />
       { (type==="audio" && visible) && (
       <div>
         <Modal
@@ -77,6 +92,15 @@ export default function(props) {
         </Modal>
       </div>
       )}
+      <div>
+        <Modal
+          visible={visibleBgSelector}
+          onOk={_ => setVisibleBgSelector(false)}
+          onCancel={_ => setVisibleBgSelector(false)}
+        >
+          <BackgroundSelector onSelect={ base64 => dispatch(setBgImage(base64))} />
+        </Modal>
+      </div>
       { (type==="audio") && (
         <div>
           <div className="space" />
@@ -99,6 +123,16 @@ export default function(props) {
           </div>
         </div>
       )}
+      <div className="space" />
+      <div style={{textAlign: "center"}}>
+        <Button 
+          onClick={ _ => setVisibleBgSelector(true)}
+          type="default"
+          shape="round"
+          icon={<PictureOutlined />}
+          danger
+        >set virtual Background</Button>
+      </div>
       <div className="space" />
       <div style={{textAlign: "left"}}>
         <Form

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="../../logo32.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>kokutele labs - WebRTC Insertable Streams</title>
+    <style>
+      .videos-view > div {
+        display: inline-block;
+        padding: 3px;
+        margin: 2.5px;
+        border: 1px solid #333;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <img src="../../logo32.png"/> kokutele labs - WebCodecs
+      </h1>
+      <p>
+        You need to enable experimental flags of Chrome, before try this experimental web app.<br/>
+        <a href="chrome://flags/#enable-experimental-web-platform-features" target="_blank">
+          chrome://flags/#enable-experimental-web-platform-features
+        </a>
+      </p>
+    </header>
+    <main>
+      <hr />
+      <div>
+        WebRTC Insertable Streams supported: <span id="insertable-streams-supported">detecting...</span>
+      </div>
+      <div class="source">
+        <h2>source videos</h2>
+        <video id="local-stream" autoPlay muted></video>
+        <div>
+          <h3>border color of receiver side</h3>
+          <label>red: <input type="number"   id="red"   value="0" step="10" min="0" max="254" /></label>
+          <label>green: <input type="number" id="green" value="0" step="10" min="0" max="254" /></label>
+          <label>blue: <input type="number"  id="blue"  value="0" step="10" min="0" max="254" /></label>
+        </div>
+      </div>
+      <div class="received">
+        <h2>received videos</h2>
+        <div>
+          <button id="add-stream">add</button>
+        </div>
+        <div class="videos-view">
+        </div>
+      <div>
+        <h2>references</h2>
+        <ul>
+          <li>
+            <a href="https://www.chromestatus.com/feature/6321945865879552">
+              Chrome Platform Status - WebRTC Insertable Streams
+            </a>
+          </li>
+          <li>
+            <a href="https://w3c.github.io/webrtc-insertable-streams/">
+              W3C Spec (Editor's Draft)
+            </a>
+          </li>
+          <li>
+            <a href="https://qiita.com/massie_g/items/2b0b6d4f61f1865b4da5">
+              WebRTC Insertable Streams で映像ストリームをいじってみた
+            </a>
+          </li>
+        </ul>
+      </div>
+    </main>
+    <footer>
+      <hr />
+      <a href="/labs">back to labs list</a><br />
+      <hr />
+      <a href="https://github.com/kokutele/kokutele" target="_blank" rel="noopener noreferer">repository - github.com/kokutele</a>
+      <hr />
+      &copy; 2020 <a href="https://medium.com/kokutele" target="_blank" rel="noopener noreferer">kokutele Project</a>
+      (by <a href="https://twitter.com/komasshu"        target="_blank" rel="noopener noreferer">@komasshu</a>)
+      <hr/>
+    </footer>
+  </body>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="./script.js"></script>
+</html>
