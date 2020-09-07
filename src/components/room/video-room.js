@@ -67,6 +67,7 @@ const RemoteView = props => {
    */
   const addRemotes = useCallback( remoteObj => {
     setRemotes( prev => {
+      prev = prev.filter( o => o.peerId !== remoteObj.peerId)
       return [...prev, remoteObj]
     })
   }, [setRemotes])

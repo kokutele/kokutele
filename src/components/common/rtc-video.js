@@ -6,7 +6,7 @@ import { Avatar } from 'antd'
 import './rtc-video.css'
 
 // fixup vendor prefix
-window.AudioContext = window.AudioContext||window.webkitAudioContext;
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 export default function(props) {
   const _video = useRef()
@@ -18,65 +18,71 @@ export default function(props) {
   const userName = !!props.userName ? props.userName : "名無しさん"
 
   useEffect( _ => {
-    if( _canvas.current && _wrapper.current && stream ) {
+    if( _canvas.current && _canvas.current.getContext && _wrapper.current && stream ) {
       const ctx = _canvas.current.getContext('2d')
         , w = _wrapper.current.offsetWidth
         , h = _wrapper.current.offsetHeight
         , x0 = 0
         , y0 = Math.floor(h / 2)
         , aCtx = new AudioContext()
-        , aSource = aCtx.createMediaStreamSource( stream )
-        , aGain = aCtx.createGain()
-        , analyser = aCtx.createAnalyser()
-        , timesArr = []
-      _canvas.current.width = w
-      _canvas.current.height = h
-
-      aSource.connect(analyser)
-      analyser.connect(aGain)
-      aGain.connect( aCtx.destination )
-      analyser.fftSize = 2048;  // The default value
-
-      aGain.gain.setValueAtTime(0, aCtx.currentTime)
-
-      let seq = 0
-      const _draw = _ => {
-        if( ++seq % 8 === 0 ) {
-          const times = new Uint8Array(analyser.fftSize);
-          const d = w / times.length
-
-          analyser.getByteTimeDomainData(times);
-          timesArr.push(times)
-          if( timesArr.length > 16) timesArr.shift()
-
-          ctx.clearRect(0, 0, w, h)
-
-          timesArr.forEach( (times, idx ) => {
-            if( idx % 8 ) {
-              const alpha = 1 / (timesArr.length / (idx + 1) )
-              ctx.beginPath()
-              ctx.strokeStyle = `rgba(0, 139, 139, ${alpha})`//'#008b8b'
-              ctx.moveTo(x0, y0)
-              for( let i = 0; i < times.length; i++) {
-                const _x = x0 + d * i
-                const _y = y0 + (times[i] - 128)
-                ctx.lineTo(_x, _y)
-              }
-              ctx.stroke()
-            }
-          })
-
-          ctx.fillText(userName, Math.ceil( w / 2 ), Math.ceil(0.05 * h), w);
-        }
-
-        _requestId.current = requestAnimationFrame(_draw)
-      }
-
       ctx.fillStyle = '#fff'
       ctx.font = "1em 'ＭＳ ゴシック'";
       ctx.textBaseline='top'
       ctx.textAlign='center'
-      _draw()
+
+      if( aCtx ) {
+        const aSource = aCtx.createMediaStreamSource( stream )
+        const aGain = aCtx.createGain()
+        const analyser = aCtx.createAnalyser()
+        const timesArr = []
+
+        _canvas.current.width = w
+        _canvas.current.height = h
+
+        aSource.connect(analyser)
+        analyser.connect(aGain)
+        aGain.connect( aCtx.destination )
+        analyser.fftSize = 2048;  // The default value
+
+        aGain.gain.setValueAtTime(0, aCtx.currentTime)
+
+        let seq = 0
+        const _draw = _ => {
+          if( ++seq % 8 === 0 ) {
+            const times = new Uint8Array(analyser.fftSize);
+            const d = w / times.length
+
+            analyser.getByteTimeDomainData(times);
+            timesArr.push(times)
+            if( timesArr.length > 16) timesArr.shift()
+
+            ctx.clearRect(0, 0, w, h)
+
+            timesArr.forEach( (times, idx ) => {
+              if( idx % 8 ) {
+                const alpha = 1 / (timesArr.length / (idx + 1) )
+                ctx.beginPath()
+                ctx.strokeStyle = `rgba(0, 139, 139, ${alpha})`//'#008b8b'
+                ctx.moveTo(x0, y0)
+                for( let i = 0; i < times.length; i++) {
+                  const _x = x0 + d * i
+                  const _y = y0 + (times[i] - 128)
+                  ctx.lineTo(_x, _y)
+                }
+                ctx.stroke()
+              }
+            })
+
+            ctx.fillText(userName, Math.ceil( w / 2 ), Math.ceil(0.05 * h), w);
+          }
+
+          ctx.fillText(userName, Math.ceil( w / 2 ), Math.ceil(0.05 * h), w);
+          _requestId.current = requestAnimationFrame(_draw)
+        }
+            _draw()
+      } else {
+        ctx.fillText(userName, Math.ceil( w / 2 ), Math.ceil(0.05 * h), w);
+      }
     }
     return function clean() {
       window.cancelAnimationFrame(_requestId.current)
