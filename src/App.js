@@ -13,15 +13,16 @@ type queryTypes = {
   r: string;
   entered: string;
   type: string;
+  disableSpeechRec: string;
 }
 
 function App() {
-  const {r, entered, type}:queryTypes = queryString.parse( window.location.search )
+  const {r, entered, type, disableSpeechRec}:queryTypes = queryString.parse( window.location.search )
 
   return (
     <div className="App">
       <Header />
-      { !r ? <Top /> : <Room roomId={r} entered={entered} type={type} />}
+      { !r ? <Top /> : <Room roomId={r} entered={entered} type={type} disableSpeechRec={disableSpeechRec==='true'} />}
     </div>
   );
 }

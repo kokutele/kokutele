@@ -67,16 +67,19 @@ const RemoteView = props => {
    */
   const addRemotes = useCallback( remoteObj => {
     setRemotes( prev => {
-      prev = prev.filter( o => o.peerId !== remoteObj.peerId)
-      return [...prev, remoteObj]
+      if( !prev.find( o => o.peerId  === remoteObj.peerId ) ) {
+        return [...prev, remoteObj]
+      } else {
+        return prev
+      }
     })
-  }, [setRemotes])
+  }, [])
 
   const deleteRemotes = useCallback( peerId => {
     setRemotes( prev => {
       return prev.filter( o => o.peerId !== peerId )
     })
-  }, [setRemotes])
+  }, [])
 
   useEffect( _ => {
     const db = new Map()
@@ -92,7 +95,7 @@ const RemoteView = props => {
           handler.send({
             type: 'meta',
             payload: {
-              userName, peerId, thumbnail, avatarBgColor, bgImage
+              userName, peerId: handler.peer.id, thumbnail, avatarBgColor, bgImage
             }
           })
         })
@@ -411,7 +414,7 @@ const ShareAlert = props => {
 
 
 export default function(props) {
-  const { localStream, type } = props
+  const { localStream, type, disableSpeechRec } = props
   const [micEnabled, setMicEnabled] = useState(true)
   const [_voiceOnly, setVoiceOnly] = useState(false)
   const [_showShareAlert, setShowShareAlert] = useState(false)
@@ -481,7 +484,8 @@ export default function(props) {
     }
 
     let handler
-    const useSpeechRec = isWebSpeechSupported
+    const useSpeechRec = !disableSpeechRec && isWebSpeechSupported
+    console.log( 'called' )
     if( useSpeechRec ) {
       handler = WebSpeechHandler.create({onResult, onError})
       handler.start()
@@ -490,7 +494,7 @@ export default function(props) {
     return function cleanup() {
       if(handler) handler.destroy()
     }
-  }, [peerId, avatarBgColor, dispatch, thumbnail, userName])
+  }, [peerId, avatarBgColor, dispatch, thumbnail, userName, disableSpeechRec])
 
   return(
     <div className="VideoRoom">
