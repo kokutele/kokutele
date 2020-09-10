@@ -40,7 +40,7 @@ const EnterStep = props => {
 }
 
 export default function Room( props ) {
-  const { roomId, type } = props
+  const { roomId, type, disableSpeechRec } = props
   const [state, changeState] = useState("IDLE")
   const [mesg, setMessage] = useState('')
   const [_localStream, setLocalStream ] = useState( null )
@@ -110,7 +110,7 @@ export default function Room( props ) {
                 </div>
               )}
               { state === "ENTERED" && (
-                <VideoRoom localStream={_localStream} roomId={props.roomId} type={props.type} />
+                <VideoRoom localStream={_localStream} roomId={roomId} type={type} disableSpeechRec={disableSpeechRec} />
               )}
             </div>
           </div>
